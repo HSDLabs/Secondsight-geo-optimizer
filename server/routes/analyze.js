@@ -41,8 +41,12 @@ router.post('/', async (req, res) => {
 
     await browser?.close()
 
+    const isNavigationTimeout = err.message?.includes('ERR_CONNECTION_TIMED_OUT')
+
     res.status(500).json({
-      error: err.message,
+      error: isNavigationTimeout
+        ? 'The page did not respond in time. Try again, or check if the site blocks automated browser requests.'
+        : err.message,
       stack: err.stack
     })
   }

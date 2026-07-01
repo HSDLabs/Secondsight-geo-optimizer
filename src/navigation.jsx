@@ -1,0 +1,73 @@
+import Overview from './pages/Overview'
+
+// Single source of truth for the app's navigation.
+// Both the Sidebar (grouped NavLinks) and the router (<Routes>) consume this list,
+// so adding a real section later is just swapping its `element`.
+//
+// Sections map to the GEO pipeline: Access -> Understand -> Content ->
+// Retrieval -> Citation, followed by synthesized outputs, a tool, and settings.
+export const NAV_GROUPS = ['Overview', 'Diagnostics', 'Insights', 'Tools', 'Settings']
+
+export const navItems = [
+  {
+    path: '/',
+    label: 'Overview',
+    group: 'Overview',
+    description: 'Executive summary comparing the human, machine, and LLM views of the page.',
+    element: <Overview />
+  },
+  {
+    path: '/crawler-access',
+    label: 'Crawler Access',
+    group: 'Diagnostics',
+    description: 'Whether AI crawlers can fetch and render the page at all — robots rules, status codes, and JavaScript rendering.'
+  },
+  {
+    path: '/ai-understanding',
+    label: 'AI Understanding',
+    group: 'Diagnostics',
+    description: 'How well machines grasp the page structure, semantics, and entities.'
+  },
+  {
+    path: '/content-intelligence',
+    label: 'Content Intelligence',
+    group: 'Diagnostics',
+    description: 'How deep and extractable the readable content is for summarization and topic inference.'
+  },
+  {
+    path: '/retrieval-readiness',
+    label: 'Retrieval Readiness',
+    group: 'Diagnostics',
+    description: 'How chunkable and retrievable the content is for RAG-style pipelines.'
+  },
+  {
+    path: '/citation-readiness',
+    label: 'Citation Readiness',
+    group: 'Diagnostics',
+    description: 'How attributable and quotable the page is when an AI system decides what to cite.'
+  },
+  {
+    path: '/content-gaps',
+    label: 'Content Gaps',
+    group: 'Insights',
+    description: 'What the page is missing compared to what an AI system expects to find.'
+  },
+  {
+    path: '/recommendations',
+    label: 'Recommendations',
+    group: 'Insights',
+    description: 'Prioritized, actionable fixes derived from the diagnostics above.'
+  },
+  {
+    path: '/prompt-simulator',
+    label: 'Prompt Simulator',
+    group: 'Tools',
+    description: 'Interactively ask an LLM about the analyzed page and inspect how it answers.'
+  },
+  {
+    path: '/settings',
+    label: 'Settings',
+    group: 'Settings',
+    description: 'Configure analysis behavior and preferences.'
+  }
+]

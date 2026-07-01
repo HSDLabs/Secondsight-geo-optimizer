@@ -1,9 +1,25 @@
 import { chromium } from 'playwright'
 
+const NAVIGATION_TIMEOUT = 45000
+const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+
+async function gotoPage(page, url) {
+  try {
+    return await page.goto(url, { waitUntil: 'domcontentloaded', timeout: NAVIGATION_TIMEOUT })
+  } catch (err) {
+    if (!String(err.message).includes('ERR_CONNECTION_TIMED_OUT')) throw err
+
+    return page.goto(url, { waitUntil: 'load', timeout: NAVIGATION_TIMEOUT })
+  }
+}
+
 export async function renderPage(url) {
   const browser = await chromium.launch()
-  const page = await browser.newPage({ viewport: { width: 1280, height: 720 } })
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  const page = await browser.newPage({
+    viewport: { width: 1280, height: 720 },
+    userAgent: USER_AGENT
+  })
+  await gotoPage(page, url)
   await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {})
   await page.waitForTimeout(700)
   const html = await page.content()
