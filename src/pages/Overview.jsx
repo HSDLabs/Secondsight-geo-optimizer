@@ -1,0 +1,389 @@
+import { useOutletContext, NavLink } from 'react-router-dom'
+import '../styles/Overview.css'
+
+import PageOverview from '../components/PageOverview'
+import ScoreBar from '../components/ScoreBar'
+import InsightCard from '../components/InsightCard'
+import { navItems } from '../navigation'
+
+/* ── SVG Icons for each module ──────────────────────────────── */
+
+const ModuleIcons = {
+  'crawler-access': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    </svg>
+  ),
+  'ai-understanding': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.58-3.25 3.93" />
+      <path d="M12 2a4 4 0 0 0-4 4c0 1.95 1.4 3.58 3.25 3.93" />
+      <path d="M12 10v4" />
+      <circle cx="12" cy="18" r="4" />
+      <path d="M10 18h4" />
+      <path d="M12 16v4" />
+      <path d="M4 10l2 2M20 10l-2 2" />
+    </svg>
+  ),
+  'content-intelligence': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14,2 14,8 20,8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <line x1="10" y1="9" x2="8" y2="9" />
+    </svg>
+  ),
+  'retrieval-readiness': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.35-4.35" />
+      <path d="M11 8v6M8 11h6" />
+    </svg>
+  ),
+  'citation-readiness': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 17c-2 0-3-1-3-3V9a3 3 0 0 1 3-3h1l-1 4h2l-1 7" />
+      <path d="M15 17c-2 0-3-1-3-3V9a3 3 0 0 1 3-3h1l-1 4h2l-1 7" />
+    </svg>
+  ),
+  'content-gaps': (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 20V10M18 20V4M6 20v-4" />
+    </svg>
+  )
+}
+
+/* ── Module catalog for the dashboard ───────────────────────── */
+
+const MODULE_ORDER = [
+  { key: 'crawler-access' },
+  { key: 'ai-understanding' },
+  { key: 'content-intelligence' },
+  { key: 'retrieval-readiness' },
+  { key: 'citation-readiness' },
+  { key: 'content-gaps' }
+]
+
+/* ── Helpers ────────────────────────────────────────────────── */
+
+function getScoreTone(score) {
+  if (score >= 80) return 'good'
+  if (score >= 55) return 'warning'
+  return 'poor'
+}
+
+function getScoreVerdict(score) {
+  if (score >= 80) return 'Excellent'
+  if (score >= 65) return 'Good'
+  if (score >= 55) return 'Fair'
+  return 'Poor'
+}
+
+function getModuleStatus(key, data, score) {
+  if (!data) return 'Awaiting Analysis'
+  if (key === 'ai-understanding') {
+    if (score == null) return 'Awaiting Analysis'
+    return getScoreVerdict(score)
+  }
+  return 'Coming Soon'
+}
+
+function groupIssues(issues = []) {
+  return issues.reduce((groups, issue) => {
+    const key = issue.type || 'Unknown issue'
+    if (!groups[key]) {
+      groups[key] = { items: [], severity: issue.severity || 'notice' }
+    }
+    groups[key].items.push(issue)
+    const severityRank = { critical: 3, warning: 2, notice: 1 }
+    if (severityRank[issue.severity] > severityRank[groups[key].severity]) {
+      groups[key].severity = issue.severity
+    }
+    return groups
+  }, {})
+}
+
+function getTopIssueGroups(issues = [], count = 3) {
+  const grouped = groupIssues(issues)
+  const severityRank = { critical: 3, warning: 2, notice: 1 }
+
+  return Object.entries(grouped)
+    .sort(([, a], [, b]) => {
+      const sevDiff = severityRank[b.severity] - severityRank[a.severity]
+      return sevDiff !== 0 ? sevDiff : b.items.length - a.items.length
+    })
+    .slice(0, count)
+    .map(([type, group]) => ({ type, ...group }))
+}
+
+function getQuickWins(data, issueCount) {
+  const wins = []
+  const issues = data?.a11y?.issues || []
+  const readable = data?.readable
+
+  // Derive actionable quick-wins from actual issues
+  const missingMeta = issues.find(i => i.type === 'Missing H1' || i.type?.includes('meta'))
+  if (missingMeta) {
+    wins.push({ title: 'Add meta description', desc: 'Improve click-through rate and AI understanding.', impact: 'High' })
+  }
+
+  const emptyLinks = issues.filter(i => i.type === 'Empty link')
+  if (emptyLinks.length > 0) {
+    wins.push({ title: 'Fix empty links', desc: `${emptyLinks.length} link(s) with no text — AI crawlers can't understand where they lead.`, impact: 'High' })
+  }
+
+  const missingAlt = issues.filter(i => i.type === 'Missing alt text')
+  if (missingAlt.length > 0) {
+    wins.push({ title: 'Add image alt text', desc: `${missingAlt.length} image(s) missing alt — reduces content understanding.`, impact: 'Medium' })
+  }
+
+  // Content signals
+  const wc = readable?.wordCount ?? 0
+  if (wc < 300) {
+    wins.push({ title: 'Add more content', desc: 'Content is too thin for comprehensive AI answers.', impact: 'High' })
+  }
+
+  if (wins.length === 0) {
+    wins.push({ title: 'Site looks good', desc: 'No critical quick wins identified.', impact: 'Low' })
+  }
+
+  return wins.slice(0, 4)
+}
+
+function formatDelta(value) {
+  if (value > 0) return `+${value}`
+  return String(value)
+}
+
+/* ── Page component ─────────────────────────────────────────── */
+
+export default function Overview() {
+  const {
+    data,
+    loading,
+    error,
+    visibilityScore,
+    issueCount,
+    scoreBreakdown,
+    analyzedAt
+  } = useOutletContext()
+
+  const modules = MODULE_ORDER.map(({ key }, idx) => {
+    const item = navItems.find(i => i.path === `/${key}`)
+    return {
+      key,
+      number: idx + 1,
+      path: item.path,
+      label: item.label,
+      description: item.description,
+      icon: ModuleIcons[key],
+      status: getModuleStatus(key, data, visibilityScore),
+      isScoreReal: key === 'ai-understanding' && data != null
+    }
+  })
+
+  const topIssues = getTopIssueGroups(data?.a11y?.issues, 3)
+  const quickWins = data ? getQuickWins(data, issueCount) : []
+  const scoreTone = getScoreTone(visibilityScore)
+
+  return (
+    <div className="overview-dashboard">
+      {error && <div className="error-banner">{error}</div>}
+
+      {!data && !loading && !error && (
+        <section className="empty-hero">
+          <div className="empty-hero-content">
+            <div className="empty-hero-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+            </div>
+            <h2>Start with a public URL.</h2>
+            <p>
+              SecondSight will analyze the page, capture a thumbnail, and surface a
+              high-level view of how AI systems may see it.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {loading && (
+        <section className="empty-hero loading-state">
+          <div className="empty-hero-content">
+            <div className="loading-spinner" />
+            <h2>Analyzing page…</h2>
+            <p>Capturing the browser view, semantic structure, and readability signals.</p>
+          </div>
+        </section>
+      )}
+
+      {data && !loading && (
+        <>
+          <PageOverview
+            data={data}
+            score={visibilityScore}
+            issueCount={issueCount}
+            analyzedAt={analyzedAt}
+          />
+
+          {/* GEO Overview — Horizontal card strip */}
+          <section className="geo-overview-section" aria-labelledby="geo-overview-title">
+            <h2 id="geo-overview-title" className="section-title">
+              <span className="eyebrow">GEO Overview</span>
+            </h2>
+
+            <div className="geo-overview-grid">
+              {modules.map(module => {
+                const scoreDisplay = module.isScoreReal ? visibilityScore : 0
+                const tone = module.isScoreReal ? getScoreTone(visibilityScore) : 'muted'
+                return (
+                  <NavLink
+                    key={module.key}
+                    to={module.path}
+                    className={`geo-module-card ${module.isScoreReal ? 'has-data' : ''}`}
+                  >
+                    <div className="module-card-top">
+                      <span className="module-number">{module.number}.</span>
+                      <span className="module-icon" aria-hidden="true">
+                        {module.icon}
+                      </span>
+                      <span className="module-name">{module.label}</span>
+                    </div>
+
+                    <div className="module-score">
+                      <strong>{scoreDisplay}</strong>
+                      <span>/100</span>
+                    </div>
+
+                    <ScoreBar score={scoreDisplay} />
+
+                    <span className={`module-verdict tone-${tone}`}>
+                      {module.status}
+                    </span>
+
+                    <p className="module-desc">{module.description}</p>
+
+                    <span className="module-link">
+                      View details
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </span>
+                  </NavLink>
+                )
+              })}
+            </div>
+          </section>
+
+          {/* Executive Summary — 3 columns */}
+          <section className="executive-summary-section" aria-labelledby="executive-title">
+            <div className="executive-summary-grid">
+              {/* AI Visibility Trend */}
+              <div className="es-card es-card-trend">
+                <div className="es-card-header">
+                  <h3>AI Visibility Trend</h3>
+                </div>
+                <div className="trend-score">
+                  <strong style={{ color: `var(--${scoreTone})` }}>{visibilityScore}</strong>
+                  <span>/ 100</span>
+                </div>
+                <ScoreBar score={visibilityScore} />
+                <p className="es-muted">
+                  Score is calculated based on our AI SEO framework across 6 pillars.
+                </p>
+                <div className="breakdown-mini">
+                  {scoreBreakdown?.items?.map(item => (
+                    <div key={item.label}>
+                      <span>{item.label}</span>
+                      <strong className={item.value < 0 ? 'negative' : 'positive'}>
+                        {formatDelta(item.value)}
+                      </strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Top Issues */}
+              <div className="es-card es-card-issues">
+                <div className="es-card-header">
+                  <h3>Top Issues</h3>
+                  <NavLink to="/ai-understanding" className="es-view-all">
+                    View all issues →
+                  </NavLink>
+                </div>
+                {topIssues.length > 0 ? (
+                  <div className="top-issues-list">
+                    {topIssues.map(issue => (
+                      <div key={issue.type} className="top-issue-item">
+                        <span className={`issue-severity-tag ${issue.severity}`}>
+                          {issue.severity}
+                        </span>
+                        <div className="top-issue-body">
+                          <span className="top-issue-name">{issue.type}</span>
+                        </div>
+                        <span className="top-issue-count">{issue.items.length}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="issues-clean-inline">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--good)" strokeWidth="2">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    <p>No visibility blockers detected.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Wins */}
+              <div className="es-card es-card-wins">
+                <div className="es-card-header">
+                  <h3>Quick Wins</h3>
+                  <span className="es-view-all">View all →</span>
+                </div>
+                <div className="quick-wins-list">
+                  {quickWins.map((win, i) => (
+                    <div key={i} className="quick-win-item">
+                      <svg className="qw-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 8v4l3 3" />
+                      </svg>
+                      <div className="qw-body">
+                        <span className="qw-title">{win.title}</span>
+                        <span className="qw-desc">{win.desc}</span>
+                      </div>
+                      <span className={`qw-impact impact-${win.impact.toLowerCase()}`}>
+                        {win.impact} Impact
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Bottom module status bar */}
+          <div className="module-status-bar" aria-label="Module status">
+            {modules.map(module => (
+              <NavLink key={module.key} to={module.path} className="status-pill">
+                <span className="status-pill-icon" aria-hidden="true">
+                  {module.icon}
+                </span>
+                <strong>{module.label}</strong>
+                <span
+                  className={`status-pill-tag tone-${module.isScoreReal ? getScoreTone(visibilityScore) : 'muted'
+                    }`}
+                >
+                  {module.status}
+                </span>
+              </NavLink>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}

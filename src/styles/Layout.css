@@ -1,0 +1,172 @@
+/*
+ * Layout chrome only: persistent sidebar, the shared header/content column,
+ * and the reserved-section placeholder. Reuses the existing design tokens from
+ * App.css so it stays visually consistent. No existing component styles are
+ * modified here.
+ */
+
+.app-layout {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+/* ---- Sidebar ---- */
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 18px;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+}
+
+.sidebar-brand {
+  padding: 4px 8px;
+}
+
+.sidebar-brand .eyebrow {
+  margin: 0;
+}
+
+.sidebar-tagline {
+  margin: 2px 0 0;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.sidebar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-group-label {
+  margin: 0 0 6px;
+  padding: 0 8px;
+  color: var(--faint);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sidebar-link {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.sidebar-link:hover {
+  color: var(--text);
+  background: var(--panel-soft);
+  text-decoration: none;
+}
+
+.sidebar-link.is-active {
+  color: var(--text);
+  background: var(--panel-raised);
+  border-color: var(--border-strong);
+}
+
+/* ---- Main column ---- */
+
+.app-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.app-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 18px 28px;
+  background: rgba(12, 15, 20, 0.86);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.app-topbar .url-input {
+  width: min(680px, 100%);
+}
+
+.app-content {
+  width: min(1480px, 100%);
+  margin: 0 auto;
+  padding: 24px 28px 48px;
+}
+
+/* ---- Reserved-section placeholder ---- */
+
+.section-placeholder {
+  padding: 24px;
+}
+
+.placeholder-lead {
+  margin: 4px 0 20px;
+  max-width: 640px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.placeholder-note {
+  padding: 18px 20px;
+  background: var(--panel-soft);
+  border: 1px dashed var(--border-strong);
+  border-radius: 8px;
+}
+
+.placeholder-note p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* ---- Responsive: collapse the sidebar to a top strip ---- */
+
+@media (max-width: 860px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+    flex-direction: column;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .app-content {
+    padding: 20px 18px 40px;
+  }
+
+  .app-topbar {
+    padding: 14px 18px;
+  }
+}

@@ -1,11 +1,11 @@
 import { useState } from 'react'
+import { Routes, Route } from 'react-router-dom'
 import './styles/App.css'
 import './styles/VisibilityLayer.css'
-import URLInput from './components/URLInput'
-import PageOverview from './components/PageOverview'
-import IssuesArea from './components/IssuesArea'
-import ScoresPanel from './components/panels/ScoresPanel'
-import VisibilityLayer from './components/panels/VisibilityLayer'
+import './styles/Layout.css'
+import AppLayout from './layout/AppLayout'
+import SectionPlaceholder from './pages/SectionPlaceholder'
+import { navItems } from './navigation'
 
 function calculateVisibilityBreakdown(data) {
   if (!data) {
@@ -70,6 +70,7 @@ export default function App() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [analyzedAt, setAnalyzedAt] = useState(null)
   const [selectedIssue, setSelectedIssue] = useState(null)
   const [selectedNodeId, setSelectedNodeId] = useState(null)
 
@@ -90,6 +91,7 @@ export default function App() {
       const json = await res.json()
       if (json.error) throw new Error(json.error)
       setData(json)
+      setAnalyzedAt(new Date().toISOString())
       setSelectedNodeId(null)
     } catch (e) {
       setError(e.message)
@@ -114,75 +116,49 @@ export default function App() {
     if (linkedNodeId) setSelectedNodeId(linkedNodeId)
   }
 
+  // Shared analysis state passed down to every section via the layout's
+  // Outlet context. Because it lives here (above the router outlet), one
+  // analysis stays live as the user navigates between sections.
+  const outletContext = {
+    data,
+    loading,
+    error,
+    visibilityScore,
+    issueCount,
+    scoreBreakdown,
+    analyzedAt,
+    selectedNode,
+    selectedNodeId,
+    setSelectedNodeId,
+    selectedIssue,
+    selectIssueGroup
+  }
+
   return (
-    <main className="app-shell">
-      <div className="app-header">
-        <div>
-          <p className="eyebrow">SecondSight</p>
-          <h1>Compare human, machine, and LLM views of a page.</h1>
-        </div>
-        <URLInput
-          value={url}
-          onChange={setUrl}
-          onAnalyze={analyze}
-          loading={loading}
-        />
-      </div>
-
-      {error && <div className="error-banner">{error}</div>}
-
-      {!data && !loading && !error && (
-        <section className="empty-hero">
-          <h2>Start with a public URL.</h2>
-          <p>
-            SecondSight will capture the visual page, extract semantic structure,
-            surface LLM-readable content, and separate visibility issues from the tree.
-          </p>
-        </section>
-      )}
-
-      {loading && (
-        <section className="empty-hero loading-state">
-          <h2>Analyzing page...</h2>
-          <p>Capturing the browser view, semantic structure, readable text, and accessibility signals.</p>
-        </section>
-      )}
-
-      {data && !loading && (
-        <>
-          <PageOverview
-            data={data}
-            score={visibilityScore}
-            issueCount={issueCount}
-            scoreBreakdown={scoreBreakdown}
+    <Routes>
+      <Route
+        element={
+          <AppLayout
+            url={url}
+            setUrl={setUrl}
+            analyze={analyze}
+            loading={loading}
+            outletContext={outletContext}
           />
-
-          <VisibilityLayer
-            data={data}
-            score={visibilityScore}
-            scoreBreakdown={scoreBreakdown}
-            selectedNode={selectedNode}
-            selectedNodeId={selectedNodeId}
-            onSelectNode={setSelectedNodeId}
-            screenshotMeta={data.screenshotMeta}
+        }
+      >
+        {navItems.map(item => (
+          <Route
+            key={item.path}
+            path={item.path}
+            element={
+              item.element ?? (
+                <SectionPlaceholder label={item.label} description={item.description} />
+              )
+            }
           />
-
-          <ScoresPanel
-            data={data}
-            score={visibilityScore}
-            issueCount={issueCount}
-            scoreBreakdown={scoreBreakdown}
-          />
-          <IssuesArea
-            issues={data.a11y?.issues}
-            semanticIndex={data.a11y?.semanticIndex}
-            selectedIssue={selectedIssue}
-            selectedNodeId={selectedNodeId}
-            onSelectIssue={selectIssueGroup}
-            onSelectNode={setSelectedNodeId}
-          />
-        </>
-      )}
-    </main>
+        ))}
+      </Route>
+    </Routes>
   )
 }
