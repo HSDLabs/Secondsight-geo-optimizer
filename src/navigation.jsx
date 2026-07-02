@@ -1,4 +1,5 @@
-import Overview from './pages/Overview'
+import Overview from './pages/overview/Overview'
+import AIUnderstanding from './pages/ai-understanding/AIUnderstanding'
 
 // Single source of truth for the app's navigation.
 // Both the Sidebar (grouped NavLinks) and the router (<Routes>) consume this list,
@@ -26,7 +27,8 @@ export const navItems = [
     path: '/ai-understanding',
     label: 'AI Understanding',
     group: 'Diagnostics',
-    description: 'How well machines grasp the page structure, semantics, and entities.'
+    description: 'How well machines grasp the page structure, semantics, and entities.',
+    element: <AIUnderstanding />
   },
   {
     path: '/content-intelligence',

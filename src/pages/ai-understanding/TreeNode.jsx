@@ -34,7 +34,6 @@ export default function TreeNode({
   if (node?.bbox && screenshotMeta?.viewport?.height) {
     const { y, h } = node.bbox
     const vh = screenshotMeta.viewport.height
-    // Check if element is at least partially in the initial viewport
     if (y < vh && (y + h) > 0) {
       viewportVisible = true
     }

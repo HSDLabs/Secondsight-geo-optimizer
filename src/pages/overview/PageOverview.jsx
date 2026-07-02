@@ -48,8 +48,6 @@ const PILLAR_MODULES = [
   { label: 'Content Quality' }
 ]
 
-/* ── Animated donut gauge ── */
-
 function ScoreGauge({ score }) {
   const [animatedScore, setAnimatedScore] = useState(0)
   const normalizedScore = Math.max(0, Math.min(100, score || 0))
@@ -108,8 +106,6 @@ function ScoreGauge({ score }) {
   )
 }
 
-/* ── 3D Perspective Thumbnail ── */
-
 function PerspectiveThumbnail({ screenshot, url }) {
   const [isHovered, setIsHovered] = useState(false)
 
@@ -149,18 +145,14 @@ function PerspectiveThumbnail({ screenshot, url }) {
   )
 }
 
-/* ── Main PageOverview ── */
-
 export default function PageOverview({ data, score, analyzedAt }) {
   const screenshot = data?.screenshots?.viewport || data?.screenshot
   const title = data?.title || data?.readable?.title || 'Untitled page'
 
   return (
     <section className="overview-card overview-hero" aria-labelledby="overview-title">
-      {/* Left: 3D perspective thumbnail */}
       <PerspectiveThumbnail screenshot={screenshot} url={data.url} />
 
-      {/* Center: Page info */}
       <div className="hero-meta">
         <h2 id="overview-title">{title}</h2>
         <div className="hero-meta-row">
@@ -178,10 +170,8 @@ export default function PageOverview({ data, score, analyzedAt }) {
         )}
       </div>
 
-      {/* Right-center: Donut gauge */}
       <ScoreGauge score={score} />
 
-      {/* Far right: Pillar scores */}
       <div className="hero-pillar-list" aria-label="Pillar scores">
         <div className="pillar-list-header">
           <span className="pillar-list-title">Pillar Scores</span>
@@ -211,7 +201,6 @@ export default function PageOverview({ data, score, analyzedAt }) {
   )
 }
 
-/* NavLink placeholder for pillar detail (not used yet) */
 function NavLink({ className, children }) {
   return <span className={className}>{children}</span>
 }
