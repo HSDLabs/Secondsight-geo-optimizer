@@ -3,21 +3,19 @@ import TreeNode from './TreeNode'
 
 /**
  * VisibilityLayer – The polished "Layer 1 – Visibility Overview"
- * 
+ *
  * A single, viewport-height section that combines:
  * 1. Human View   – 3D perspective website preview
  * 2. Machine Structure – Compact semantic tree
  * 3. LLM Extraction – Content summary + inline stats
  * 4. AI Visibility Score – Animated donut gauge
- * 
+ *
  * Everything fits in one view without excessive scrolling.
  */
 
 export default function VisibilityLayer({
   data,
   score,
-  scoreBreakdown,
-  selectedNode,
   selectedNodeId,
   onSelectNode,
   screenshotMeta
@@ -36,15 +34,12 @@ export default function VisibilityLayer({
       </div>
 
       <div className="layer-grid">
-        {/* Column 1: Human View */}
         <HumanViewCompact
           screenshot={screenshot}
           fullPageScreenshot={fullPageScreenshot}
           screenshotMeta={screenshotMeta}
-          selectedNode={selectedNode}
         />
 
-        {/* Column 2: Machine Structure */}
         <MachineStructureCompact
           snapshot={snapshot}
           screenshotMeta={screenshotMeta}
@@ -52,20 +47,15 @@ export default function VisibilityLayer({
           onSelectNode={onSelectNode}
         />
 
-        {/* Column 3: LLM Extraction */}
         <LLMExtractionCompact readable={readable} />
 
-        {/* Column 4: AI Visibility Score */}
-        <ScoreGauge score={score} scoreBreakdown={scoreBreakdown} />
+        <ScoreGauge score={score} />
       </div>
     </section>
   )
 }
 
-
-/* ─── Human View: 3D Perspective Preview ─── */
-
-function HumanViewCompact({ screenshot, fullPageScreenshot, screenshotMeta, selectedNode }) {
+function HumanViewCompact({ screenshot, fullPageScreenshot, screenshotMeta }) {
   const [mode, setMode] = useState('viewport')
   const [isHovered, setIsHovered] = useState(false)
   const frameRef = useRef(null)
@@ -92,7 +82,6 @@ function HumanViewCompact({ screenshot, fullPageScreenshot, screenshotMeta, sele
       >
         {activeScreenshot ? (
           <div className={`perspective-stage ${isHovered ? 'flat' : ''}`}>
-            {/* Browser chrome mockup */}
             <div className="browser-chrome">
               <div className="chrome-dots">
                 <span className="dot red" />
@@ -139,9 +128,6 @@ function HumanViewCompact({ screenshot, fullPageScreenshot, screenshotMeta, sele
   )
 }
 
-
-/* ─── Machine Structure: Compact Semantic Tree ─── */
-
 function MachineStructureCompact({ snapshot, screenshotMeta, selectedNodeId, onSelectNode }) {
   const selectedPath = useMemo(() => findNodePath(snapshot, selectedNodeId), [snapshot, selectedNodeId])
   const stats = useMemo(() => getTreeStats(snapshot), [snapshot])
@@ -183,9 +169,6 @@ function MachineStructureCompact({ snapshot, screenshotMeta, selectedNodeId, onS
     </div>
   )
 }
-
-
-/* ─── LLM Extraction: Content Summary ─── */
 
 function LLMExtractionCompact({ readable }) {
   const [activeTab, setActiveTab] = useState('summary')
@@ -258,20 +241,16 @@ function LLMExtractionCompact({ readable }) {
   )
 }
 
-
-/* ─── AI Visibility Score: Animated Donut Gauge ─── */
-
-function ScoreGauge({ score, scoreBreakdown }) {
+function ScoreGauge({ score }) {
   const gaugeRef = useRef(null)
   const [animatedScore, setAnimatedScore] = useState(0)
   const normalizedScore = Math.max(0, Math.min(100, score || 0))
 
-  // Determine color based on score
   const scoreColor = normalizedScore >= 80
-    ? '#48c78e'  // good green
+    ? '#48c78e'
     : normalizedScore >= 55
-    ? '#f2b84b'  // warning yellow
-    : '#ff6b6b'  // poor red
+    ? '#f2b84b'
+    : '#ff6b6b'
 
   const scoreLabel = normalizedScore >= 80
     ? 'Good'
@@ -285,7 +264,6 @@ function ScoreGauge({ score, scoreBreakdown }) {
     ? 'Moderate visibility. Some improvements recommended.'
     : 'Low visibility. Significant improvements needed.'
 
-  // Animate score on mount
   useEffect(() => {
     let frame
     const start = performance.now()
@@ -294,7 +272,6 @@ function ScoreGauge({ score, scoreBreakdown }) {
     function animate(now) {
       const elapsed = now - start
       const progress = Math.min(elapsed / duration, 1)
-      // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3)
       setAnimatedScore(Math.round(eased * normalizedScore))
       if (progress < 1) frame = requestAnimationFrame(animate)
@@ -304,7 +281,6 @@ function ScoreGauge({ score, scoreBreakdown }) {
     return () => cancelAnimationFrame(frame)
   }, [normalizedScore])
 
-  // SVG donut parameters
   const size = 128
   const strokeWidth = 10
   const radius = (size - strokeWidth) / 2
@@ -322,7 +298,6 @@ function ScoreGauge({ score, scoreBreakdown }) {
           viewBox={`0 0 ${size} ${size}`}
           className="gauge-ring"
         >
-          {/* Background ring */}
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -331,7 +306,6 @@ function ScoreGauge({ score, scoreBreakdown }) {
             stroke="rgba(255,255,255,0.06)"
             strokeWidth={strokeWidth}
           />
-          {/* Score ring */}
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -375,9 +349,6 @@ function ScoreGauge({ score, scoreBreakdown }) {
     </div>
   )
 }
-
-
-/* ─── Utility Functions ─── */
 
 function findNodePath(node, nodeId, path = []) {
   if (!node || !nodeId) return []
@@ -457,8 +428,12 @@ function getContactSignals(text) {
   const signals = []
   const email = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0]
   const phone = text.match(/(?:\+?\d[\d\s().-]{7,}\d)/)?.[0]
+  const address = text.match(/\b\d{2,6}\s+[A-Za-z0-9.,\s-]+(?:Street|St|Road|Rd|Avenue|Ave|Lane|Ln|Drive|Dr|Boulevard|Blvd)\b/i)?.[0]
+
   if (email) signals.push(email)
   if (phone) signals.push(clean(phone))
+  if (address) signals.push(clean(address))
+
   return unique(signals).slice(0, 5)
 }
 
@@ -467,6 +442,7 @@ function getBusinessSignals(text) {
     .split(/\n+/)
     .map(clean)
     .filter(line => /\b(pricing|services|products|customers|locations|hours|booking|demo|support|about)\b/i.test(line))
+
   return unique(lines).slice(0, 6)
 }
 

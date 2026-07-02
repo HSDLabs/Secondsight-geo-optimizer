@@ -1,10 +1,8 @@
-import { useOutletContext, NavLink } from 'react-router-dom'
-import '../styles/Overview.css'
+import { NavLink, useOutletContext } from 'react-router-dom'
+import '../../styles/Overview.css'
 
-import PageOverview from '../components/PageOverview'
-import ScoreBar from '../components/ScoreBar'
-import InsightCard from '../components/InsightCard'
-import { navItems } from '../navigation'
+import PageOverview from './PageOverview'
+import ScoreBar from './ScoreBar'
 
 /* ── SVG Icons for each module ──────────────────────────────── */
 
@@ -58,12 +56,42 @@ const ModuleIcons = {
 /* ── Module catalog for the dashboard ───────────────────────── */
 
 const MODULE_ORDER = [
-  { key: 'crawler-access' },
-  { key: 'ai-understanding' },
-  { key: 'content-intelligence' },
-  { key: 'retrieval-readiness' },
-  { key: 'citation-readiness' },
-  { key: 'content-gaps' }
+  {
+    key: 'crawler-access',
+    path: '/crawler-access',
+    label: 'Crawler Access',
+    description: 'Whether AI crawlers can fetch and render the page at all — robots rules, status codes, and JavaScript rendering.'
+  },
+  {
+    key: 'ai-understanding',
+    path: '/ai-understanding',
+    label: 'AI Understanding',
+    description: 'How well machines grasp the page structure, semantics, and entities.'
+  },
+  {
+    key: 'content-intelligence',
+    path: '/content-intelligence',
+    label: 'Content Intelligence',
+    description: 'How deep and extractable the readable content is for summarization and topic inference.'
+  },
+  {
+    key: 'retrieval-readiness',
+    path: '/retrieval-readiness',
+    label: 'Retrieval Readiness',
+    description: 'How chunkable and retrievable the content is for RAG-style pipelines.'
+  },
+  {
+    key: 'citation-readiness',
+    path: '/citation-readiness',
+    label: 'Citation Readiness',
+    description: 'How attributable and quotable the page is when an AI system decides what to cite.'
+  },
+  {
+    key: 'content-gaps',
+    path: '/content-gaps',
+    label: 'Content Gaps',
+    description: 'What the page is missing compared to what an AI system expects to find.'
+  }
 ]
 
 /* ── Helpers ────────────────────────────────────────────────── */
@@ -118,12 +146,11 @@ function getTopIssueGroups(issues = [], count = 3) {
     .map(([type, group]) => ({ type, ...group }))
 }
 
-function getQuickWins(data, issueCount) {
+function getQuickWins(data) {
   const wins = []
   const issues = data?.a11y?.issues || []
   const readable = data?.readable
 
-  // Derive actionable quick-wins from actual issues
   const missingMeta = issues.find(i => i.type === 'Missing H1' || i.type?.includes('meta'))
   if (missingMeta) {
     wins.push({ title: 'Add meta description', desc: 'Improve click-through rate and AI understanding.', impact: 'High' })
@@ -139,7 +166,6 @@ function getQuickWins(data, issueCount) {
     wins.push({ title: 'Add image alt text', desc: `${missingAlt.length} image(s) missing alt — reduces content understanding.`, impact: 'Medium' })
   }
 
-  // Content signals
   const wc = readable?.wordCount ?? 0
   if (wc < 300) {
     wins.push({ title: 'Add more content', desc: 'Content is too thin for comprehensive AI answers.', impact: 'High' })
@@ -170,22 +196,19 @@ export default function Overview() {
     analyzedAt
   } = useOutletContext()
 
-  const modules = MODULE_ORDER.map(({ key }, idx) => {
-    const item = navItems.find(i => i.path === `/${key}`)
-    return {
-      key,
-      number: idx + 1,
-      path: item.path,
-      label: item.label,
-      description: item.description,
-      icon: ModuleIcons[key],
-      status: getModuleStatus(key, data, visibilityScore),
-      isScoreReal: key === 'ai-understanding' && data != null
-    }
-  })
+  const modules = MODULE_ORDER.map(({ key, path, label, description }, idx) => ({
+    key,
+    number: idx + 1,
+    path,
+    label,
+    description,
+    icon: ModuleIcons[key],
+    status: getModuleStatus(key, data, visibilityScore),
+    isScoreReal: key === 'ai-understanding' && data != null
+  }))
 
   const topIssues = getTopIssueGroups(data?.a11y?.issues, 3)
-  const quickWins = data ? getQuickWins(data, issueCount) : []
+  const quickWins = data ? getQuickWins(data) : []
   const scoreTone = getScoreTone(visibilityScore)
 
   return (
@@ -229,7 +252,6 @@ export default function Overview() {
             analyzedAt={analyzedAt}
           />
 
-          {/* GEO Overview — Horizontal card strip */}
           <section className="geo-overview-section" aria-labelledby="geo-overview-title">
             <h2 id="geo-overview-title" className="section-title">
               <span className="eyebrow">GEO Overview</span>
@@ -278,10 +300,8 @@ export default function Overview() {
             </div>
           </section>
 
-          {/* Executive Summary — 3 columns */}
           <section className="executive-summary-section" aria-labelledby="executive-title">
             <div className="executive-summary-grid">
-              {/* AI Visibility Trend */}
               <div className="es-card es-card-trend">
                 <div className="es-card-header">
                   <h3>AI Visibility Trend</h3>
@@ -306,7 +326,6 @@ export default function Overview() {
                 </div>
               </div>
 
-              {/* Top Issues */}
               <div className="es-card es-card-issues">
                 <div className="es-card-header">
                   <h3>Top Issues</h3>
@@ -338,7 +357,6 @@ export default function Overview() {
                 )}
               </div>
 
-              {/* Quick Wins */}
               <div className="es-card es-card-wins">
                 <div className="es-card-header">
                   <h3>Quick Wins</h3>
@@ -365,7 +383,6 @@ export default function Overview() {
             </div>
           </section>
 
-          {/* Bottom module status bar */}
           <div className="module-status-bar" aria-label="Module status">
             {modules.map(module => (
               <NavLink key={module.key} to={module.path} className="status-pill">

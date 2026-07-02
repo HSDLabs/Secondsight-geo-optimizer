@@ -1,4 +1,4 @@
-import InsightCard from './InsightCard'
+import InsightCard from '../overview/InsightCard'
 
 function getStructureInsight(tree) {
   const childCount = tree?.children?.length ?? 0
