@@ -42,17 +42,15 @@ function getTone(score) {
 
 const PILLAR_MODULES = [
   { label: 'Crawler Access' },
-  { label: 'AI Understanding', isReal: true },
-  { label: 'Retrieval Readiness' },
-  { label: 'Citation Readiness' },
-  { label: 'Content Quality' }
+  { label: 'AI Understanding', isReal: true }
 ]
 
-function ScoreGauge({ score }) {
+function ScoreGauge({ score, isAwaiting, loading }) {
   const [animatedScore, setAnimatedScore] = useState(0)
   const normalizedScore = Math.max(0, Math.min(100, score || 0))
-  const scoreColor = getScoreColor(normalizedScore)
-  const scoreLabel = getScoreLabel(normalizedScore)
+  const isReal = !isAwaiting && !loading && score != null
+  const scoreColor = isReal ? getScoreColor(normalizedScore) : 'var(--border-strong)'
+  const scoreLabel = isReal ? getScoreLabel(normalizedScore) : (loading ? 'Analyzing...' : 'Awaiting')
 
   useEffect(() => {
     let frame
@@ -75,7 +73,7 @@ function ScoreGauge({ score }) {
   const strokeWidth = 10
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
-  const offset = circumference - (animatedScore / 100) * circumference
+  const offset = isReal ? (circumference - (animatedScore / 100) * circumference) : circumference
 
   return (
     <div className="hero-gauge">
@@ -92,15 +90,19 @@ function ScoreGauge({ score }) {
           />
         </svg>
         <div className="gauge-label">
-          <span className="gauge-number" style={{ color: scoreColor }}>{animatedScore}</span>
+          <span className="gauge-number" style={{ color: isReal ? scoreColor : 'var(--muted)' }}>
+            {isReal ? animatedScore : '-'}
+          </span>
           <span className="gauge-max">/100</span>
         </div>
       </div>
-      <div className="gauge-verdict" style={{ color: scoreColor }}>{scoreLabel}</div>
+      <div className="gauge-verdict" style={{ color: isReal ? scoreColor : 'var(--muted)' }}>{scoreLabel}</div>
       <p className="gauge-desc">
-        {normalizedScore >= 65
-          ? 'Your site has good foundation for AI visibility.'
-          : 'Needs improvement to reach AI visibility.'}
+        {!isReal 
+          ? (loading ? 'Building visibility score...' : 'Enter a URL above to calculate the GEO Score.')
+          : (normalizedScore >= 65
+            ? 'Your site has good foundation for AI visibility.'
+            : 'Needs improvement to reach AI visibility.')}
       </p>
     </div>
   )
@@ -109,7 +111,15 @@ function ScoreGauge({ score }) {
 function PerspectiveThumbnail({ screenshot, url }) {
   const [isHovered, setIsHovered] = useState(false)
 
-  if (!screenshot) return null
+  if (!screenshot) {
+    return (
+      <div className="hero-perspective-frame skeleton-frame">
+        <div className="perspective-stage skeleton-stage">
+          <div className="skeleton-image" style={{ width: '100%', height: '120px', background: 'var(--border)', borderRadius: '6px', opacity: 0.5 }} />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -145,32 +155,36 @@ function PerspectiveThumbnail({ screenshot, url }) {
   )
 }
 
-export default function PageOverview({ data, crawlerData, score, analyzedAt }) {
+export default function PageOverview({ data, loading, crawlerData, score, aiScore, analyzedAt }) {
   const screenshot = data?.screenshots?.viewport || data?.screenshot
-  const title = data?.title || data?.readable?.title || 'Untitled page'
+  const title = data?.title || data?.readable?.title || (loading ? 'Analyzing page...' : 'Ready for Analysis')
+  const url = data?.url || (loading ? 'Scanning target...' : 'Enter a public URL to get started.')
+  const isAwaiting = !data && !loading
 
   return (
-    <section className="overview-card overview-hero" aria-labelledby="overview-title">
-      <PerspectiveThumbnail screenshot={screenshot} url={data.url} />
+    <section className={`overview-card overview-hero ${loading ? 'is-loading' : ''} ${isAwaiting ? 'is-awaiting' : ''}`} aria-labelledby="overview-title">
+      <PerspectiveThumbnail screenshot={screenshot} url={url} />
 
       <div className="hero-meta">
-        <h2 id="overview-title">{title}</h2>
+        <h2 id="overview-title" className={loading && !data ? 'skeleton-text' : ''} style={{ width: loading && !data ? '200px' : 'auto', color: isAwaiting ? 'var(--muted)' : 'inherit' }}>{title}</h2>
         <div className="hero-meta-row">
-          <a href={data.url} target="_blank" rel="noreferrer" className="hero-url">
-            {formatUrl(data.url)}
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
-            </svg>
+          <a href={url} target="_blank" rel="noreferrer" className="hero-url" style={{ pointerEvents: isAwaiting || loading ? 'none' : 'auto', opacity: isAwaiting || loading ? 0.5 : 1 }}>
+            {formatUrl(url)}
+            {!isAwaiting && !loading && (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+              </svg>
+            )}
           </a>
         </div>
-        {analyzedAt && (
+        {analyzedAt && !isAwaiting && !loading && (
           <p className="hero-last-analyzed">
             Analyzed on {formatAnalyzedAt(analyzedAt)}
           </p>
         )}
       </div>
 
-      <ScoreGauge score={score} />
+      <ScoreGauge score={score} isAwaiting={isAwaiting} loading={loading} />
 
       <div className="hero-pillar-list" aria-label="Pillar scores">
         <div className="pillar-list-header">
@@ -178,23 +192,30 @@ export default function PageOverview({ data, crawlerData, score, analyzedAt }) {
           <NavLink className="pillar-view-link">View details →</NavLink>
         </div>
         {PILLAR_MODULES.map(module => {
-          const isReal = (module.label === 'AI Understanding' && score != null) ||
+          const isReal = (module.label === 'AI Understanding' && !isAwaiting && !loading && aiScore != null) ||
                          (module.label === 'Crawler Access' && crawlerData != null)
           const val = module.label === 'AI Understanding'
-            ? (score ?? 0)
+            ? (aiScore ?? 0)
             : (module.label === 'Crawler Access' && crawlerData ? crawlerData.score : 0)
           const tone = isReal ? getTone(val) : 'muted'
-          const label = isReal ? getScoreLabel(val) : 'Coming'
+          
+          let label = 'In Dev'
+          if (isReal) {
+            label = getScoreLabel(val)
+          } else if (isAwaiting || loading) {
+            label = loading ? 'Analyzing...' : 'Awaiting'
+          }
+          
           return (
             <div key={module.label} className="pillar-row">
               <span className="pillar-row-label">{module.label}</span>
               <div className="pillar-row-bar">
                 <div
                   className={`pillar-row-fill tone-${tone}`}
-                  style={{ width: `${val}%` }}
+                  style={{ width: `${isReal ? val : 0}%` }}
                 />
               </div>
-              <span className="pillar-row-value">{val}</span>
+              <span className="pillar-row-value">{isReal ? val : '-'}</span>
               <span className={`pillar-row-status tone-${tone}`}>{label}</span>
             </div>
           )

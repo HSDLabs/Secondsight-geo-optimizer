@@ -208,9 +208,11 @@ function StageCard({ stage, index, isComplete, issueTypes, onAction, data }) {
 }
 
 function renderCenterBlock(stage, metrics, warningCount, data) {
-  if (stage.status === 'waiting') {
-    return <span style={{ fontSize: '0.8rem', color: 'var(--muted)', fontStyle: 'italic' }}>Pending check...</span>
-  }
+  const isWaiting = stage.status === 'waiting'
+  
+  const SkeletonVal = ({ width }) => (
+    <div className="skeleton-text" style={{ width, height: '14px', display: 'inline-block', verticalAlign: 'middle', opacity: 0.5 }} />
+  )
 
   switch (stage.id) {
     case 'identity': {
@@ -223,12 +225,16 @@ function renderCenterBlock(stage, metrics, warningCount, data) {
       return (
         <div className="stage-row-metrics" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <div className="metric-primary-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="metric-main-val" style={{ fontSize: '0.9rem', fontWeight: 650, color: 'var(--text)' }}>{brandVal}</span>
+            <span className="metric-main-val" style={{ fontSize: '0.9rem', fontWeight: 650, color: 'var(--text)' }}>
+              {isWaiting ? <SkeletonVal width="120px" /> : brandVal}
+            </span>
             <span className="row-badge success" style={{ fontSize: '0.65rem', background: 'rgba(72,199,142,0.1)', color: 'var(--good)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(72,199,142,0.15)' }}>Primary Brand</span>
           </div>
-          <span className="metric-sub-val" style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>{typeVal}</span>
+          <span className="metric-sub-val" style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>
+            {isWaiting ? <SkeletonVal width="80px" /> : typeVal}
+          </span>
           <span className="metric-confidence-val" style={{ fontSize: '0.72rem', color: 'var(--faint)' }}>
-            Confidence <span style={{ color: 'var(--good)', fontWeight: 600 }}>{certainty}</span>
+            {isWaiting ? <SkeletonVal width="60px" /> : <>Confidence <span style={{ color: 'var(--good)', fontWeight: 600 }}>{certainty}</span></>}
           </span>
         </div>
       )
@@ -240,12 +246,16 @@ function renderCenterBlock(stage, metrics, warningCount, data) {
       return (
         <div className="stage-row-metrics" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <div className="metric-primary-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="metric-main-val" style={{ fontSize: '0.9rem', fontWeight: 650, color: 'var(--text)' }}>{nodeCount}</span>
+            <span className="metric-main-val" style={{ fontSize: '0.9rem', fontWeight: 650, color: 'var(--text)' }}>
+              {isWaiting ? <SkeletonVal width="40px" /> : nodeCount}
+            </span>
             <span className="row-badge info" style={{ fontSize: '0.65rem', background: 'rgba(77,163,255,0.1)', color: 'var(--accent)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(77,163,255,0.15)' }}>Machine Nodes</span>
           </div>
-          <span className="metric-sub-val" style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>Main regions detected</span>
+          <span className="metric-sub-val" style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>
+            {isWaiting ? <SkeletonVal width="110px" /> : 'Main regions detected'}
+          </span>
           <span className="metric-confidence-val" style={{ fontSize: '0.72rem', color: 'var(--faint)' }}>
-            Confidence <span style={{ color: 'var(--good)', fontWeight: 600 }}>{certainty}</span>
+            {isWaiting ? <SkeletonVal width="60px" /> : <>Confidence <span style={{ color: 'var(--good)', fontWeight: 600 }}>{certainty}</span></>}
           </span>
         </div>
       )
@@ -258,17 +268,30 @@ function renderCenterBlock(stage, metrics, warningCount, data) {
       return (
         <div className="stage-row-metrics" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <div className="metric-primary-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span className="metric-main-val" style={{ fontSize: '0.9rem', fontWeight: 650, color: 'var(--text)' }}>{intentVal}</span>
+            <span className="metric-main-val" style={{ fontSize: '0.9rem', fontWeight: 650, color: 'var(--text)' }}>
+              {isWaiting ? <SkeletonVal width="140px" /> : intentVal}
+            </span>
             <span className="row-badge success" style={{ fontSize: '0.65rem', background: 'rgba(72,199,142,0.1)', color: 'var(--good)', padding: '2px 6px', borderRadius: '4px', border: '1px solid rgba(72,199,142,0.15)' }}>Primary Intent</span>
           </div>
-          <span className="metric-sub-val" style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>Readable content detected</span>
+          <span className="metric-sub-val" style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>
+            {isWaiting ? <SkeletonVal width="130px" /> : 'Readable content detected'}
+          </span>
           <span className="metric-confidence-val" style={{ fontSize: '0.72rem', color: 'var(--faint)' }}>
-            Confidence <span style={{ color: 'var(--good)', fontWeight: 600 }}>{certainty}</span>
+            {isWaiting ? <SkeletonVal width="60px" /> : <>Confidence <span style={{ color: 'var(--good)', fontWeight: 600 }}>{certainty}</span></>}
           </span>
         </div>
       )
     }
     case 'knowledge': {
+      if (isWaiting) {
+        return (
+          <div className="stage-row-pills-grid" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', maxWidth: '380px' }}>
+            <SkeletonVal width="100px" />
+            <SkeletonVal width="80px" />
+            <SkeletonVal width="110px" />
+          </div>
+        )
+      }
       return (
         <div className="stage-row-pills-grid" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', maxWidth: '380px' }}>
           {stage.findings.map(f => (
@@ -296,13 +319,15 @@ function renderCenterBlock(stage, metrics, warningCount, data) {
         <div className="stage-row-metrics" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <div className="metric-primary-row" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span className="metric-main-val" style={{ fontSize: '0.9rem', fontWeight: 650, color: hasIssues ? 'var(--warning)' : 'var(--text)' }}>
-              {statusLabel}
+              {isWaiting ? <SkeletonVal width="110px" /> : statusLabel}
             </span>
             <span className={`row-badge ${badgeClass}`} style={{ fontSize: '0.65rem', background: hasIssues ? 'rgba(242,184,75,0.1)' : 'rgba(72,199,142,0.1)', color: hasIssues ? 'var(--warning)' : 'var(--good)', padding: '2px 6px', borderRadius: '4px', border: hasIssues ? '1px solid rgba(242,184,75,0.15)' : '1px solid rgba(72,199,142,0.15)' }}>{badgeText}</span>
           </div>
-          <span className="metric-sub-val" style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>{subVal}</span>
+          <span className="metric-sub-val" style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>
+            {isWaiting ? <SkeletonVal width="150px" /> : subVal}
+          </span>
           <span className="metric-confidence-val" style={{ fontSize: '0.72rem', color: 'var(--faint)' }}>
-            Confidence <span style={{ color: 'var(--good)', fontWeight: 600 }}>{certainty}</span>
+            {isWaiting ? <SkeletonVal width="60px" /> : <>Confidence <span style={{ color: 'var(--good)', fontWeight: 600 }}>{certainty}</span></>}
           </span>
         </div>
       )

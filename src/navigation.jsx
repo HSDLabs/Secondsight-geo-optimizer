@@ -35,21 +35,9 @@ export const navItems = [
   },
   {
     path: '/content-intelligence',
-    label: 'Content Intelligence',
+    label: 'External Intelligence',
     group: 'Diagnostics',
-    description: 'How deep and extractable the readable content is for summarization and topic inference.'
-  },
-  {
-    path: '/retrieval-readiness',
-    label: 'Retrieval Readiness',
-    group: 'Diagnostics',
-    description: 'How chunkable and retrievable the content is for RAG-style pipelines.'
-  },
-  {
-    path: '/citation-readiness',
-    label: 'Citation Readiness',
-    group: 'Diagnostics',
-    description: 'How attributable and quotable the page is when an AI system decides what to cite.'
+    description: 'Aggregates insights from news, Reddit, forums, and public web discussions.'
   },
   {
     path: '/content-gaps',

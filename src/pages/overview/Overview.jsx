@@ -71,26 +71,26 @@ const MODULE_ORDER = [
   {
     key: 'content-intelligence',
     path: '/content-intelligence',
-    label: 'Content Intelligence',
-    description: 'How deep and extractable the readable content is for summarization and topic inference.'
+    label: 'External Intelligence',
+    description: 'Aggregates insights from news, Reddit, forums, and public web discussions.'
   },
   {
     key: 'retrieval-readiness',
     path: '/retrieval-readiness',
     label: 'Retrieval Readiness',
-    description: 'How chunkable and retrievable the content is for RAG-style pipelines.'
+    description: 'Lorem ipsum dolor sit amet, consectetur.'
   },
   {
     key: 'citation-readiness',
     path: '/citation-readiness',
     label: 'Citation Readiness',
-    description: 'How attributable and quotable the page is when an AI system decides what to cite.'
+    description: 'Lorem ipsum dolor sit amet, consectetur.'
   },
   {
     key: 'content-gaps',
     path: '/content-gaps',
     label: 'Content Gaps',
-    description: 'What the page is missing compared to what an AI system expects to find.'
+    description: 'Lorem ipsum dolor sit amet, consectetur.'
   }
 ]
 
@@ -119,7 +119,7 @@ function getModuleStatus(key, data, score, crawlerData) {
     if (!crawlerData) return 'Awaiting Analysis'
     return getScoreVerdict(crawlerData.score)
   }
-  return 'Coming Soon'
+  return 'In Dev'
 }
 
 function groupIssues(issues = []) {
@@ -214,208 +214,180 @@ export default function Overview() {
 
   const topIssues = getTopIssueGroups(data?.a11y?.issues, 3)
   const quickWins = data ? getQuickWins(data) : []
-  const scoreTone = getScoreTone(visibilityScore)
+
+  const availableScores = []
+  if (data && visibilityScore != null) availableScores.push(visibilityScore)
+  if (crawlerData && crawlerData.score != null) availableScores.push(crawlerData.score)
+
+  const overallScore = availableScores.length > 0
+    ? Math.round(availableScores.reduce((a, b) => a + b, 0) / availableScores.length)
+    : null
+
+  const scoreTone = getScoreTone(overallScore || 0)
 
   return (
     <div className="overview-dashboard">
       {error && <div className="error-banner">{error}</div>}
 
-      {!data && !loading && !error && (
-        <section className="empty-hero">
-          <div className="empty-hero-content">
-            <div className="empty-hero-icon">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-            </div>
-            <h2>Start with a public URL.</h2>
-            <p>
-              SecondSight will analyze the page, capture a thumbnail, and surface a
-              high-level view of how AI systems may see it.
-            </p>
-          </div>
-        </section>
-      )}
+      <PageOverview
+        data={data}
+        loading={loading}
+        crawlerData={crawlerData}
+        score={overallScore}
+        aiScore={visibilityScore}
+        issueCount={data ? issueCount : null}
+        analyzedAt={analyzedAt}
+      />
 
-      {loading && (
-        <div className="overview-skeleton" style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '16px' }}>
-          <div className="skeleton-box" style={{ height: '200px', width: '100%' }} />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-            <div className="skeleton-box" style={{ height: '120px' }} />
-            <div className="skeleton-box" style={{ height: '120px' }} />
-            <div className="skeleton-box" style={{ height: '120px' }} />
-            <div className="skeleton-box" style={{ height: '120px' }} />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '16px' }}>
-            <div className="skeleton-box" style={{ height: '340px' }} />
-            <div className="skeleton-box" style={{ height: '340px' }} />
-            <div className="skeleton-box" style={{ height: '340px' }} />
-          </div>
-        </div>
-      )}
+      <section className="geo-overview-section" aria-labelledby="geo-overview-title">
+        <h2 id="geo-overview-title" className="section-title">
+          <span className="eyebrow">GEO Overview</span>
+        </h2>
 
-      {data && !loading && (
-        <>
-          <PageOverview
-            data={data}
-            crawlerData={crawlerData}
-            score={visibilityScore}
-            issueCount={issueCount}
-            analyzedAt={analyzedAt}
-          />
-
-          <section className="geo-overview-section" aria-labelledby="geo-overview-title">
-            <h2 id="geo-overview-title" className="section-title">
-              <span className="eyebrow">GEO Overview</span>
-            </h2>
-
-            <div className="geo-overview-grid">
-              {modules.map(module => {
-                const scoreDisplay = module.key === 'ai-understanding'
-                  ? visibilityScore
-                  : (module.key === 'crawler-access' && crawlerData ? crawlerData.score : 0)
-                const tone = module.isScoreReal ? getScoreTone(scoreDisplay) : 'muted'
-                return (
-                  <NavLink
-                    key={module.key}
-                    to={module.path}
-                    className={`geo-module-card ${module.isScoreReal ? 'has-data' : ''}`}
-                  >
-                    <div className="module-card-top">
-                      <span className="module-number">{module.number}.</span>
-                      <span className="module-icon" aria-hidden="true">
-                        {module.icon}
-                      </span>
-                      <span className="module-name">{module.label}</span>
-                    </div>
-
-                    <div className="module-score">
-                      <strong>{scoreDisplay}</strong>
-                      <span>/100</span>
-                    </div>
-
-                    <ScoreBar score={scoreDisplay} />
-
-                    <span className={`module-verdict tone-${tone}`}>
-                      {module.status}
-                    </span>
-
-                    <p className="module-desc">{module.description}</p>
-
-                    <span className="module-link">
-                      View details
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M5 12h14M12 5l7 7-7 7" />
-                      </svg>
-                    </span>
-                  </NavLink>
-                )
-              })}
-            </div>
-          </section>
-
-          <section className="executive-summary-section" aria-labelledby="executive-title">
-            <div className="executive-summary-grid">
-              <div className="es-card es-card-trend">
-                <div className="es-card-header">
-                  <h3>AI Visibility Trend</h3>
+        <div className="geo-overview-grid">
+          {modules.map(module => {
+            const scoreDisplay = module.key === 'ai-understanding'
+              ? visibilityScore
+              : (module.key === 'crawler-access' && crawlerData ? crawlerData.score : 0)
+            const tone = module.isScoreReal ? getScoreTone(scoreDisplay) : 'muted'
+            return (
+              <NavLink
+                key={module.key}
+                to={module.path}
+                className={`geo-module-card ${module.isScoreReal ? 'has-data' : ''}`}
+              >
+                <div className="module-card-top">
+                  <span className="module-number">{module.number}.</span>
+                  <span className="module-icon" aria-hidden="true">
+                    {module.icon}
+                  </span>
+                  <span className="module-name">{module.label}</span>
                 </div>
-                <div className="trend-score">
-                  <strong style={{ color: `var(--${scoreTone})` }}>{visibilityScore}</strong>
-                  <span>/ 100</span>
-                </div>
-                <ScoreBar score={visibilityScore} />
-                <p className="es-muted">
-                  Score is calculated based on our AI SEO framework across 6 pillars.
-                </p>
-                <div className="breakdown-mini">
-                  {scoreBreakdown?.items?.map(item => (
-                    <div key={item.label}>
-                      <span>{item.label}</span>
-                      <strong className={item.value < 0 ? 'negative' : 'positive'}>
-                        {formatDelta(item.value)}
-                      </strong>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              <div className="es-card es-card-issues">
-                <div className="es-card-header">
-                  <h3>Top Issues</h3>
-                  <NavLink to="/ai-understanding" className="es-view-all">
-                    View all issues →
-                  </NavLink>
+                <div className="module-score">
+                  <strong>{module.isScoreReal ? scoreDisplay : '-'}</strong>
+                  <span>/100</span>
                 </div>
-                {topIssues.length > 0 ? (
-                  <div className="top-issues-list">
-                    {topIssues.map(issue => (
-                      <div key={issue.type} className="top-issue-item">
-                        <span className={`issue-severity-tag ${issue.severity}`}>
-                          {issue.severity}
-                        </span>
-                        <div className="top-issue-body">
-                          <span className="top-issue-name">{issue.type}</span>
-                        </div>
-                        <span className="top-issue-count">{issue.items.length}</span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="issues-clean-inline">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--good)" strokeWidth="2">
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    <p>No visibility blockers detected.</p>
-                  </div>
-                )}
-              </div>
 
-              <div className="es-card es-card-wins">
-                <div className="es-card-header">
-                  <h3>Quick Wins</h3>
-                  <span className="es-view-all">View all →</span>
-                </div>
-                <div className="quick-wins-list">
-                  {quickWins.map((win, i) => (
-                    <div key={i} className="quick-win-item">
-                      <svg className="qw-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M12 8v4l3 3" />
-                      </svg>
-                      <div className="qw-body">
-                        <span className="qw-title">{win.title}</span>
-                        <span className="qw-desc">{win.desc}</span>
-                      </div>
-                      <span className={`qw-impact impact-${win.impact.toLowerCase()}`}>
-                        {win.impact} Impact
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
+                <ScoreBar score={module.isScoreReal ? scoreDisplay : 0} />
 
-          <div className="module-status-bar" aria-label="Module status">
-            {modules.map(module => (
-              <NavLink key={module.key} to={module.path} className="status-pill">
-                <span className="status-pill-icon" aria-hidden="true">
-                  {module.icon}
-                </span>
-                <strong>{module.label}</strong>
-                <span
-                  className={`status-pill-tag tone-${module.isScoreReal ? getScoreTone(visibilityScore) : 'muted'
-                    }`}
-                >
+                <span className={`module-verdict tone-${tone}`}>
                   {module.status}
                 </span>
+
+                <p className="module-desc">{module.description}</p>
+
+                <span className="module-link">
+                  View details
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </span>
               </NavLink>
-            ))}
+            )
+          })}
+        </div>
+      </section>
+
+      <section className="executive-summary-section" aria-labelledby="executive-title">
+        <div className="executive-summary-grid">
+          <div className="es-card es-card-trend">
+            <div className="es-card-header">
+              <h3>AI Visibility Trend</h3>
+            </div>
+            <div className="trend-score">
+              <strong style={{ color: `var(--${scoreTone})` }}>{visibilityScore}</strong>
+              <span>/ 100</span>
+            </div>
+            <ScoreBar score={visibilityScore} />
+            <p className="es-muted">
+              Score is calculated based on our AI SEO framework across 6 pillars.
+            </p>
+            <div className="breakdown-mini">
+              {scoreBreakdown?.items?.map(item => (
+                <div key={item.label}>
+                  <span>{item.label}</span>
+                  <strong className={item.value < 0 ? 'negative' : 'positive'}>
+                    {formatDelta(item.value)}
+                  </strong>
+                </div>
+              ))}
+            </div>
           </div>
-        </>
-      )}
+
+          <div className="es-card es-card-issues">
+            <div className="es-card-header">
+              <h3>Top Issues</h3>
+              <NavLink to="/ai-understanding" className="es-view-all">
+                View all issues →
+              </NavLink>
+            </div>
+            {topIssues.length > 0 ? (
+              <div className="top-issues-list">
+                {topIssues.map(issue => (
+                  <div key={issue.type} className="top-issue-item">
+                    <span className={`issue-severity-tag ${issue.severity}`}>
+                      {issue.severity}
+                    </span>
+                    <div className="top-issue-body">
+                      <span className="top-issue-name">{issue.type}</span>
+                    </div>
+                    <span className="top-issue-count">{issue.items.length}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="issues-clean-inline">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--good)" strokeWidth="2">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+                <p>No visibility blockers detected.</p>
+              </div>
+            )}
+          </div>
+
+          <div className="es-card es-card-wins">
+            <div className="es-card-header">
+              <h3>Quick Wins</h3>
+              <span className="es-view-all">View all →</span>
+            </div>
+            <div className="quick-wins-list">
+              {quickWins.map((win, i) => (
+                <div key={i} className="quick-win-item">
+                  <svg className="qw-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 8v4l3 3" />
+                  </svg>
+                  <div className="qw-body">
+                    <span className="qw-title">{win.title}</span>
+                    <span className="qw-desc">{win.desc}</span>
+                  </div>
+                  <span className={`qw-impact impact-${win.impact.toLowerCase()}`}>
+                    {win.impact} Impact
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="module-status-bar" aria-label="Module status">
+        {modules.map(module => (
+          <NavLink key={module.key} to={module.path} className="status-pill">
+            <span className="status-pill-icon" aria-hidden="true">
+              {module.icon}
+            </span>
+            <strong>{module.label}</strong>
+            <span
+              className={`status-pill-tag tone-${module.isScoreReal ? getScoreTone(visibilityScore) : 'muted'
+                }`}
+            >
+              {module.status}
+            </span>
+          </NavLink>
+        ))}
+      </div>
     </div>
   )
 }

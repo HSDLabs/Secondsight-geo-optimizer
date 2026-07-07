@@ -81,77 +81,13 @@ export default function CrawlerAccess() {
     })
   }, [issues])
 
-  // Handle Loading/Empty States
-  if (mainLoading) {
-    return (
-      <div className="crawler-skeleton" style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '16px' }}>
-        <div className="skeleton-box" style={{ height: '160px', width: '100%' }} />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-          <div className="skeleton-box" style={{ height: '380px' }} />
-          <div className="skeleton-box" style={{ height: '380px', gridColumn: 'span 2' }} />
-        </div>
-        <div className="skeleton-box" style={{ height: '240px', width: '100%' }} />
-      </div>
-    )
-  }
-
-  if (mainError) {
-    return (
-      <div className="error-banner">
-        <h4>Analysis Failed</h4>
-        <p>{mainError}</p>
-      </div>
-    )
-  }
-
-  if (!mainData) {
-    return (
-      <section className="empty-hero">
-        <div className="empty-hero-content">
-          <div className="empty-hero-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-            </svg>
-          </div>
-          <h2>Analyze a URL to check Crawler Access.</h2>
-          <p>We will probe robots.txt, trace sitemaps, construct your crawl graph, and diagnose visibility issues for AI search agents.</p>
-        </div>
-      </section>
-    )
-  }
-
-  if (loading) {
-    return (
-      <div className="crawler-skeleton" style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginTop: '16px' }}>
-        <div className="skeleton-box" style={{ height: '160px', width: '100%' }} />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-          <div className="skeleton-box" style={{ height: '380px' }} />
-          <div className="skeleton-box" style={{ height: '380px', gridColumn: 'span 2' }} />
-        </div>
-        <div className="skeleton-box" style={{ height: '240px', width: '100%' }} />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="error-banner">
-        <h4>Crawler Diagnostics Error</h4>
-        <p>{error}</p>
-      </div>
-    )
-  }
-
-  if (!crawlerData) return null
-
-  // Destructure crawler result
-  const {
-    origin,
-    robots,
-    sitemaps,
-    score
-  } = crawlerData
+  // Computed Fallbacks for Empty/Loading States
+  const origin = crawlerData?.origin || ''
+  const robots = crawlerData?.robots || { aiCrawlerPermissions: {}, rules: [], crawlDelays: {} }
+  const sitemaps = crawlerData?.sitemaps || { discovered: [], urls: [], errors: [] }
+  const score = crawlerData?.score || 0
+  const isAwaiting = !mainData && !crawlerData
+  const showLoading = mainLoading || loading
 
   // Summary Metrics calculations
   const botsAllowedCount = AI_CRAWLERS.filter(bot => getBotStatusLabel(robots, bot.ua) === 'Allowed').length
@@ -180,8 +116,10 @@ export default function CrawlerAccess() {
   }
 
   return (
-    <div className="crawler-access-page">
-      
+    <div className={`crawler-access-page ${showLoading ? 'is-loading' : ''} ${isAwaiting ? 'is-awaiting' : ''}`}>
+      {mainError && <div className="error-banner">{mainError}</div>}
+      {error && <div className="error-banner">{error}</div>}
+
       {/* 1. Crawler Health Overview */}
       <CrawlerHealthOverview
         score={score}
@@ -192,44 +130,47 @@ export default function CrawlerAccess() {
         parsedSitemapsCount={parsedSitemapsCount}
         totalSitemapsCount={totalSitemapsCount}
         criticalIssuesCount={criticalIssuesCount}
+        loading={showLoading}
+        isAwaiting={isAwaiting}
       />
 
-      {/* 2. Crawler Access List */}
-      <CrawlerPermissions
-        robots={robots}
-      />
+      <div style={{ opacity: isAwaiting ? 0.6 : 1, pointerEvents: isAwaiting || showLoading ? 'none' : 'auto', transition: 'opacity 0.3s' }}>
+        {/* 2. Crawler Access List */}
+        <CrawlerPermissions
+          robots={robots}
+        />
 
-      {/* 3. robots.txt Interactive Viewer */}
-      <RobotsViewer
-        robots={robots}
-        sitemaps={sitemaps}
-      />
+        {/* 3. robots.txt Interactive Viewer */}
+        <RobotsViewer
+          robots={robots}
+          sitemaps={sitemaps}
+        />
 
-      {/* 4. Sitemap Explorer */}
-      <SitemapExplorer
-        sitemaps={sitemaps}
-        origin={origin}
-        issues={issues}
-        expandedSitemaps={expandedSitemaps}
-        sitemapsPageSize={sitemapsPageSize}
-        toggleSitemap={toggleSitemap}
-        loadMoreSitemapUrls={loadMoreSitemapUrls}
-      />
+        {/* 4. Sitemap Explorer */}
+        <SitemapExplorer
+          sitemaps={sitemaps}
+          origin={origin}
+          issues={issues}
+          expandedSitemaps={expandedSitemaps}
+          sitemapsPageSize={sitemapsPageSize}
+          toggleSitemap={toggleSitemap}
+          loadMoreSitemapUrls={loadMoreSitemapUrls}
+        />
 
-      {/* 5. Discovery Graph */}
-      <DiscoveryGraph
-        crawlerData={crawlerData}
-        activeGraphNode={activeGraphNode}
-        setActiveGraphNode={setActiveGraphNode}
-      />
+        {/* 5. Discovery Graph */}
+        <DiscoveryGraph
+          crawlerData={crawlerData}
+          activeGraphNode={activeGraphNode}
+          setActiveGraphNode={setActiveGraphNode}
+        />
 
-      {/* 6. Crawler Issues Accordion (Action Queue) */}
-      <CrawlerIssues
-        sortedIssues={sortedIssues}
-        expandedIssues={expandedIssues}
-        setExpandedIssues={setExpandedIssues}
-      />
-      
+        {/* 6. Crawler Issues Accordion (Action Queue) */}
+        <CrawlerIssues
+          sortedIssues={sortedIssues}
+          expandedIssues={expandedIssues}
+          setExpandedIssues={setExpandedIssues}
+        />
+      </div>
     </div>
   )
 }

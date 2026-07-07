@@ -120,14 +120,7 @@ export default function AIUnderstanding() {
           />
         </section>
 
-        {loading && !hasResults ? (
-          <div className="understanding-skeleton" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div className="skeleton-box" style={{ height: '340px', width: '100%' }} />
-            <div className="skeleton-box" style={{ height: '240px', width: '100%' }} />
-          </div>
-        ) : (
-          <>
-            <UnderstandingFlow
+        <UnderstandingFlow
               data={data}
               progressState={analysisProgress}
               issueTypes={issueTypes}
@@ -166,8 +159,6 @@ export default function AIUnderstanding() {
             </div>
           )}
         </section>
-        </>
-        )}
       </section>
     </div>
   )
