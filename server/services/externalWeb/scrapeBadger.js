@@ -1,7 +1,13 @@
 import { ScrapeBadger } from "scrapebadger";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
-dotenv.config({ path: "./server/.env" });
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// File-relative path: works regardless of the process working directory.
+// dotenv is also loaded centrally in server/index.js; this is a safe fallback.
+dotenv.config({ path: path.join(__dirname, "..", "..", ".env") }); // server/.env
 
 // Patch for Reddit query/time -> q/t bug
 const originalFetch = global.fetch;
