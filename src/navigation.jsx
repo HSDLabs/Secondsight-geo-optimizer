@@ -2,6 +2,7 @@ import Overview from './pages/overview/Overview'
 import AIUnderstanding from './pages/ai-understanding/AIUnderstanding'
 import CrawlerAccess from './pages/crawler-access/CrawlerAccess'
 import Settings from './pages/settings/Settings'
+import ExternalIntelligence from './pages/external-intelligence/ExternalIntelligence'
 
 // Single source of truth for the app's navigation.
 // Both the Sidebar (grouped NavLinks) and the router (<Routes>) consume this list,
@@ -37,7 +38,8 @@ export const navItems = [
     path: '/content-intelligence',
     label: 'External Intelligence',
     group: 'Diagnostics',
-    description: 'Aggregates insights from news, Reddit, forums, and public web discussions.'
+    description: 'Aggregates insights from news, Reddit, forums, and public web discussions.',
+    element: <ExternalIntelligence />
   },
   {
     path: '/content-gaps',

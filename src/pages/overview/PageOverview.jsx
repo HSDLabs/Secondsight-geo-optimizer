@@ -42,7 +42,8 @@ function getTone(score) {
 
 const PILLAR_MODULES = [
   { label: 'Crawler Access' },
-  { label: 'AI Understanding', isReal: true }
+  { label: 'Machine Understanding', isReal: true },
+  { label: 'External Intelligence' }
 ]
 
 function ScoreGauge({ score, isAwaiting, loading }) {
@@ -98,7 +99,7 @@ function ScoreGauge({ score, isAwaiting, loading }) {
       </div>
       <div className="gauge-verdict" style={{ color: isReal ? scoreColor : 'var(--muted)' }}>{scoreLabel}</div>
       <p className="gauge-desc">
-        {!isReal 
+        {!isReal
           ? (loading ? 'Building visibility score...' : 'Enter a URL above to calculate the GEO Score.')
           : (normalizedScore >= 65
             ? 'Your site has good foundation for AI visibility.'
@@ -155,7 +156,7 @@ function PerspectiveThumbnail({ screenshot, url }) {
   )
 }
 
-export default function PageOverview({ data, loading, crawlerData, score, aiScore, analyzedAt }) {
+export default function PageOverview({ data, loading, crawlerScore, score, aiScore, externalScore, analyzedAt }) {
   const screenshot = data?.screenshots?.viewport || data?.screenshot
   const title = data?.title || data?.readable?.title || (loading ? 'Analyzing page...' : 'Ready for Analysis')
   const url = data?.url || (loading ? 'Scanning target...' : 'Enter a public URL to get started.')
@@ -192,20 +193,26 @@ export default function PageOverview({ data, loading, crawlerData, score, aiScor
           <NavLink className="pillar-view-link">View details →</NavLink>
         </div>
         {PILLAR_MODULES.map(module => {
-          const isReal = (module.label === 'AI Understanding' && !isAwaiting && !loading && aiScore != null) ||
-                         (module.label === 'Crawler Access' && crawlerData != null)
-          const val = module.label === 'AI Understanding'
-            ? (aiScore ?? 0)
-            : (module.label === 'Crawler Access' && crawlerData ? crawlerData.score : 0)
+          const isReal = (module.label === 'Machine Understanding' && !isAwaiting && (aiScore != null || loading)) ||
+            (module.label === 'Crawler Access' && crawlerScore != null) ||
+            (module.label === 'External Intelligence' && externalScore != null)
+
+          let val = 0;
+          if (module.label === 'Machine Understanding') val = aiScore ?? 0;
+          if (module.label === 'Crawler Access') val = crawlerScore ?? 0;
+          if (module.label === 'External Intelligence') val = externalScore ?? 0;
+
           const tone = isReal ? getTone(val) : 'muted'
-          
+
           let label = 'In Dev'
-          if (isReal) {
+          if (loading) {
+            label = 'Analyzing...'
+          } else if (isAwaiting) {
+            label = 'Awaiting'
+          } else if (isReal) {
             label = getScoreLabel(val)
-          } else if (isAwaiting || loading) {
-            label = loading ? 'Analyzing...' : 'Awaiting'
           }
-          
+
           return (
             <div key={module.label} className="pillar-row">
               <span className="pillar-row-label">{module.label}</span>

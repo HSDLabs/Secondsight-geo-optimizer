@@ -9,68 +9,13 @@ import { navItems } from './navigation'
 import { useProgressiveAnalysis } from './hooks/useProgressiveAnalysis'
 import { getProgressMetrics } from './pages/ai-understanding/progressiveAnalysis'
 
-function calculateVisibilityBreakdown(data) {
-  if (!data) {
-    return {
-      score: 0,
-      items: []
-    }
-  }
-
-  const wordCount = data.readable?.wordCount ?? 0
-  const issues = data.a11y?.issues || []
-  const structureCount = data.a11y?.snapshot?.children?.length ?? 0
-  const semanticNodeCount = Object.keys(data.a11y?.semanticIndex || {}).length
-
-  const structure = Math.min(20, structureCount * 3 + Math.min(8, Math.round(semanticNodeCount / 15)))
-
-  const criticalIssues = issues.filter(issue => issue.severity === 'critical')
-  const warningIssues = issues.filter(issue => issue.severity === 'warning')
-  const criticalPenalty = criticalIssues.length > 0
-    ? 4 + Math.min(8, (criticalIssues.length - 1) * 2)
-    : 0
-  const warningPenalty = warningIssues.length > 0
-    ? 2 + Math.min(4, warningIssues.length - 1)
-    : 0
-  const accessibility = -Math.min(16, criticalPenalty + warningPenalty)
-
-  const contentDepth = wordCount >= 800 ? 20
-    : wordCount >= 500 ? 16
-    : wordCount >= 250 ? 10
-    : wordCount >= 100 ? 4
-    : -8
-
-  const extractability = data.readable?.markdown ? 12 : -6
-
-  const h1Issues = issues.filter(issue => issue.type === 'Missing H1' || issue.type?.startsWith('Multiple H1'))
-  const headingBonus = h1Issues.length === 0 ? 8 : 0
-
-  const base = 40
-  const score = Math.max(0, Math.min(100, base + structure + accessibility + contentDepth + extractability + headingBonus))
-
-  return {
-    score,
-    items: [
-      { label: 'Base', value: base },
-      { label: 'Structure', value: structure },
-      { label: 'Accessibility', value: accessibility },
-      { label: 'Content Depth', value: contentDepth },
-      { label: 'Extractability', value: extractability },
-      { label: 'Heading Structure', value: headingBonus > 0 ? headingBonus : -(h1Issues.length * 3) }
-    ],
-    placeholders: [
-      'Crawler Access',
-      'Entity Understanding',
-      'Retrieval Readiness',
-      'Citation Readiness'
-    ]
-  }
-}
+import { computeVisibilityBreakdown } from './utils/scoring'
 
 export default function App() {
   const [url, setUrl] = useState('')
   const [data, setData] = useState(null)
   const [crawlerData, setCrawlerData] = useState(null)
+  const [externalData, setExternalData] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [analyzedAt, setAnalyzedAt] = useState(null)
@@ -134,11 +79,12 @@ export default function App() {
     setSelectedNodeId(null)
     setData(null)
     setCrawlerData(null)
+    setExternalData(null)
     setAnalyzedAt(null)
     startAnalysisProgress(trimmedUrl)
 
     try {
-      const [analyzeRes, crawlerRes] = await Promise.allSettled([
+      const [analyzeRes, crawlerRes, externalRes] = await Promise.allSettled([
         fetch('/api/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -148,11 +94,17 @@ export default function App() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url: trimmedUrl })
+        }),
+        fetch('/api/externalWeb/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: trimmedUrl })
         })
       ])
 
       let mainJson = null
       let crawlerJson = null
+      let externalJson = null
 
       if (analyzeRes.status === 'fulfilled' && analyzeRes.value.ok) {
         mainJson = await analyzeRes.value.json()
@@ -169,8 +121,15 @@ export default function App() {
         console.warn('Crawler analysis failed silently during parallel fetch')
       }
 
+      if (externalRes.status === 'fulfilled' && externalRes.value.ok) {
+        externalJson = await externalRes.value.json()
+      } else {
+        console.warn('External analysis failed silently during parallel fetch')
+      }
+
       setData(mainJson)
       setCrawlerData(crawlerJson)
+      setExternalData(externalJson)
       setAnalyzedAt(new Date().toISOString())
       setSelectedNodeId(null)
       clearAnalysisProgress()
@@ -185,17 +144,15 @@ export default function App() {
   }
 
   const issueCount = data?.a11y?.issues?.length ?? 0
-  const scoreBreakdown = calculateVisibilityBreakdown(data)
+  const scoreBreakdown = computeVisibilityBreakdown(data)
   const progressMetrics = getProgressMetrics(analysisProgress)
   
-  let finalScore = scoreBreakdown.score
-  if (crawlerData && typeof crawlerData.score === 'number') {
-    finalScore = Math.round((scoreBreakdown.score + crawlerData.score) / 2)
-  }
-
-  const visibilityScore = analysisProgress?.phase && analysisProgress.phase !== 'idle'
-    ? progressMetrics.understandingScore
-    : finalScore
+  const isAwaiting = !data && !loading && (!analysisProgress?.phase || analysisProgress.phase === 'idle')
+  const visibilityScore = isAwaiting
+    ? null
+    : (analysisProgress?.phase && analysisProgress.phase !== 'idle'
+      ? progressMetrics.understandingScore
+      : scoreBreakdown.score)
   const selectedNode = selectedNodeId ? data?.a11y?.semanticIndex?.[selectedNodeId] : null
 
   function selectIssueGroup(type) {
@@ -226,7 +183,8 @@ export default function App() {
     selectedIssue,
     selectIssueGroup,
     analysisProgress,
-    crawlerData
+    crawlerData,
+    externalData
   }
 
   return (

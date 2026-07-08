@@ -1,10 +1,10 @@
 import { NavLink, useOutletContext } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import '../../styles/Overview.css'
 
 import PageOverview from './PageOverview'
 import ScoreBar from './ScoreBar'
-
-/* ── SVG Icons for each module ──────────────────────────────── */
+import { computeExternalScore, computeOverallScore } from '../../utils/scoring'
 
 const ModuleIcons = {
   'crawler-access': (
@@ -65,7 +65,7 @@ const MODULE_ORDER = [
   {
     key: 'ai-understanding',
     path: '/ai-understanding',
-    label: 'AI Understanding',
+    label: 'Machine Understanding',
     description: 'How well machines grasp the page structure, semantics, and entities.'
   },
   {
@@ -109,18 +109,24 @@ function getScoreVerdict(score) {
   return 'Poor'
 }
 
-function getModuleStatus(key, data, score, crawlerData) {
+function getModuleStatus(key, data, score, crawlerScore, externalScore, loading) {
+  if (loading) return 'Analyzing...'
   if (!data) return 'Awaiting Analysis'
   if (key === 'ai-understanding') {
     if (score == null) return 'Awaiting Analysis'
     return getScoreVerdict(score)
   }
   if (key === 'crawler-access') {
-    if (!crawlerData) return 'Awaiting Analysis'
-    return getScoreVerdict(crawlerData.score)
+    if (crawlerScore == null) return 'Awaiting Analysis'
+    return getScoreVerdict(crawlerScore)
+  }
+  if (key === 'content-intelligence') {
+    if (externalScore == null) return 'Awaiting Analysis'
+    return getScoreVerdict(externalScore)
   }
   return 'In Dev'
 }
+
 
 function groupIssues(issues = []) {
   return issues.reduce((groups, issue) => {
@@ -157,7 +163,7 @@ function getQuickWins(data) {
 
   const missingMeta = issues.find(i => i.type === 'Missing H1' || i.type?.includes('meta'))
   if (missingMeta) {
-    wins.push({ title: 'Add meta description', desc: 'Improve click-through rate and AI understanding.', impact: 'High' })
+    wins.push({ title: 'Add meta description', desc: 'Improve click-through rate and MACHINE understanding.', impact: 'High' })
   }
 
   const emptyLinks = issues.filter(i => i.type === 'Empty link')
@@ -198,30 +204,68 @@ export default function Overview() {
     issueCount,
     scoreBreakdown,
     analyzedAt,
-    crawlerData
+    crawlerData,
+    externalData
   } = useOutletContext()
 
-  const modules = MODULE_ORDER.map(({ key, path, label, description }, idx) => ({
-    key,
-    number: idx + 1,
-    path,
-    label,
-    description,
-    icon: ModuleIcons[key],
-    status: getModuleStatus(key, data, visibilityScore, crawlerData),
-    isScoreReal: (key === 'ai-understanding' && data != null) || (key === 'crawler-access' && crawlerData != null)
-  }))
+  const externalScore = computeExternalScore(externalData)
 
   const topIssues = getTopIssueGroups(data?.a11y?.issues, 3)
   const quickWins = data ? getQuickWins(data) : []
 
-  const availableScores = []
-  if (data && visibilityScore != null) availableScores.push(visibilityScore)
-  if (crawlerData && crawlerData.score != null) availableScores.push(crawlerData.score)
+  const [fakeCrawler, setFakeCrawler] = useState(0)
+  const [fakeExternal, setFakeExternal] = useState(0)
 
-  const overallScore = availableScores.length > 0
-    ? Math.round(availableScores.reduce((a, b) => a + b, 0) / availableScores.length)
-    : null
+  useEffect(() => {
+    if (!loading) {
+      setFakeCrawler(0)
+      setFakeExternal(0)
+      return
+    }
+
+    const interval = setInterval(() => {
+      setFakeCrawler(prev => {
+        const jump = Math.floor(Math.random() * 10) - 2
+        return Math.min(95, Math.max(0, prev + jump))
+      })
+      setFakeExternal(prev => {
+        const jump = Math.floor(Math.random() * 10) - 2
+        return Math.min(95, Math.max(0, prev + jump))
+      })
+    }, 300)
+
+    return () => clearInterval(interval)
+  }, [loading])
+
+  const activeCrawlerScore = loading ? fakeCrawler : ((!loading && crawlerData) ? crawlerData.score : null)
+  const activeExternalScore = loading ? fakeExternal : ((!loading && externalData) ? externalScore : null)
+
+  const overallScore = computeOverallScore(
+    (data != null || loading) ? visibilityScore : null,
+    activeCrawlerScore,
+    activeExternalScore
+  )
+
+  const modules = MODULE_ORDER.map(({ key, path, label, description }, idx) => {
+    let scoreDisplay = null;
+    if (key === 'ai-understanding') scoreDisplay = visibilityScore;
+    if (key === 'crawler-access') scoreDisplay = activeCrawlerScore;
+    if (key === 'content-intelligence') scoreDisplay = activeExternalScore;
+
+    const isScoreReal = scoreDisplay != null;
+
+    return {
+      key,
+      number: idx + 1,
+      path,
+      label,
+      description,
+      icon: ModuleIcons[key],
+      status: getModuleStatus(key, data, visibilityScore, activeCrawlerScore, activeExternalScore, loading),
+      isScoreReal,
+      scoreValue: scoreDisplay
+    }
+  })
 
   const scoreTone = getScoreTone(overallScore || 0)
 
@@ -232,9 +276,10 @@ export default function Overview() {
       <PageOverview
         data={data}
         loading={loading}
-        crawlerData={crawlerData}
+        crawlerScore={activeCrawlerScore}
         score={overallScore}
         aiScore={visibilityScore}
+        externalScore={activeExternalScore}
         issueCount={data ? issueCount : null}
         analyzedAt={analyzedAt}
       />
@@ -246,9 +291,11 @@ export default function Overview() {
 
         <div className="geo-overview-grid">
           {modules.map(module => {
-            const scoreDisplay = module.key === 'ai-understanding'
-              ? visibilityScore
-              : (module.key === 'crawler-access' && crawlerData ? crawlerData.score : 0)
+            let scoreDisplay = null;
+            if (module.key === 'ai-understanding') scoreDisplay = visibilityScore;
+            if (module.key === 'crawler-access') scoreDisplay = crawlerData?.score;
+            if (module.key === 'content-intelligence') scoreDisplay = externalScore;
+
             const tone = module.isScoreReal ? getScoreTone(scoreDisplay) : 'muted'
             return (
               <NavLink

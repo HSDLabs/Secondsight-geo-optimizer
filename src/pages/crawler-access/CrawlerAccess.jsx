@@ -11,63 +11,15 @@ import DiscoveryGraph from './DiscoveryGraph'
 import CrawlerIssues from './CrawlerIssues'
 
 export default function CrawlerAccess() {
-  const { data: mainData, loading: mainLoading, error: mainError } = useOutletContext()
-  
-  // Crawler-specific state
-  const [crawlerData, setCrawlerData] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  
+  const { data: mainData, loading: showLoading, error: parentError, crawlerData } = useOutletContext()
+  const mainError = parentError;
+  const error = null;
+
   // UI Interactive States
   const [expandedSitemaps, setExpandedSitemaps] = useState({})
   const [sitemapsPageSize, setSitemapsPageSize] = useState({})
   const [expandedIssues, setExpandedIssues] = useState({})
   const [activeGraphNode, setActiveGraphNode] = useState(null)
-
-  // 1. Fetch crawler data when main URL changes or completes analysis
-  useEffect(() => {
-    if (!mainData?.url) {
-      queueMicrotask(() => {
-        setCrawlerData(null)
-      })
-      return
-    }
-
-    let isMounted = true
-    
-    async function fetchCrawlerAnalysis() {
-      setLoading(true)
-      setError(null)
-      try {
-        const res = await fetch('/api/crawler', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: mainData.url })
-        })
-        const json = await res.json()
-        if (!res.ok) {
-          throw new Error(json.error || `Server responded with status ${res.status}`)
-        }
-        if (isMounted) {
-          setCrawlerData(json)
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(err.message)
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false)
-        }
-      }
-    }
-
-    fetchCrawlerAnalysis()
-
-    return () => {
-      isMounted = false
-    }
-  }, [mainData?.url])
 
   const issues = useMemo(() => crawlerData?.issues || [], [crawlerData?.issues])
 
@@ -87,7 +39,6 @@ export default function CrawlerAccess() {
   const sitemaps = crawlerData?.sitemaps || { discovered: [], urls: [], errors: [] }
   const score = crawlerData?.score || 0
   const isAwaiting = !mainData && !crawlerData
-  const showLoading = mainLoading || loading
 
   // Summary Metrics calculations
   const botsAllowedCount = AI_CRAWLERS.filter(bot => getBotStatusLabel(robots, bot.ua) === 'Allowed').length

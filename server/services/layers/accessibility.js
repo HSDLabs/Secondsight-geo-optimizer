@@ -129,13 +129,13 @@ export async function extractAccessibility(page) {
         if (['nav', 'header', 'footer', 'main', 'article', 'section', 'aside', 'form', 'ul', 'ol'].includes(tag)) {
           const role = current.getAttribute('role') || tag
           const ariaLabel = current.getAttribute('aria-label')
-          const id = current.id
+          const id = current.getAttribute('id')
           const className = typeof current.className === 'string' ? current.className.split(' ')[0] : ''
           
           let identifier = ariaLabel || id || className
           let humanRole = role.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
           
-          if (identifier) {
+          if (identifier && typeof identifier === 'string') {
              identifier = identifier.replace(/[-_.]/g, ' ').trim().replace(/\b\w/g, c => c.toUpperCase())
              return `${humanRole} (${identifier})`.trim()
           }

@@ -10,7 +10,7 @@ export default function UnderstandingFlow({ data, progressState, issueTypes = ne
       <div className="analysis-section-header understanding-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px' }}>
         <div>
           <p className="eyebrow" style={{ textTransform: 'uppercase', letterSpacing: '0.1em', fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 600 }}>
-            LAYER 2: AI UNDERSTANDING
+            LAYER 2: MACHINE UNDERSTANDING
           </p>
           <h2 id="understanding-title" style={{ fontSize: '1.1rem', color: 'var(--muted)', fontWeight: 'normal', margin: '4px 0 0' }}>
             What AI concluded from the evidence above.
@@ -28,7 +28,7 @@ export default function UnderstandingFlow({ data, progressState, issueTypes = ne
                 key={stage.id}
                 className={`timeline-inline-step ${isStageComplete ? 'complete' : ''} ${stage.status === 'processing' ? 'active' : ''}`}
               >
-                <div className="timeline-inline-node">
+                <div className="timeline-inline-node" style={{ width: '100%', justifyContent: 'center', position: 'relative', display: 'flex', alignItems: 'center', height: '18px' }}>
                   <span className="timeline-inline-dot">
                     {isStageComplete ? (
                       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '10px', height: '10px' }}>
@@ -38,9 +38,9 @@ export default function UnderstandingFlow({ data, progressState, issueTypes = ne
                       <span className="timeline-inline-dot-inner" style={{ background: stage.status === 'processing' ? stage.accent : 'rgba(255,255,255,0.1)' }} />
                     )}
                   </span>
+                  {index < stages.length - 1 && <span className="timeline-inline-line" style={{ background: isStageComplete ? 'var(--good)' : 'rgba(255,255,255,0.08)', top: '9px', marginTop: '-0.75px', transform: 'none' }} />}
                 </div>
                 <span className="timeline-inline-label">{stage.title}</span>
-                {index < stages.length - 1 && <span className="timeline-inline-line" style={{ background: isStageComplete ? 'var(--good)' : 'rgba(255,255,255,0.08)' }} />}
               </div>
             )
           })}
@@ -92,18 +92,18 @@ function StageCard({ stage, index, isComplete, issueTypes, onAction, data }) {
 
   const stageColor = stage.id === 'identity' ? 'rgb(168, 85, 247)'
     : stage.id === 'structure' ? 'rgb(96, 165, 250)'
-    : stage.id === 'content' ? 'rgb(52, 211, 153)'
-    : stage.id === 'knowledge' ? 'rgb(251, 191, 36)'
-    : stage.id === 'accessibility' ? 'rgb(129, 140, 248)'
-    : 'var(--accent)'
+      : stage.id === 'content' ? 'rgb(52, 211, 153)'
+        : stage.id === 'knowledge' ? 'rgb(251, 191, 36)'
+          : stage.id === 'accessibility' ? 'rgb(129, 140, 248)'
+            : 'var(--accent)'
 
   return (
     <article
       className={`stage-row-card stage-${stage.id} status-${metrics.status} ${isOpen ? 'expanded' : 'collapsed'}`}
       style={{ '--stage-accent': stageColor }}
     >
-      <div 
-        className="stage-row-header" 
+      <div
+        className="stage-row-header"
         onClick={() => setIsOpen(!isOpen)}
         style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px' }}
       >
@@ -165,7 +165,7 @@ function StageCard({ stage, index, isComplete, issueTypes, onAction, data }) {
           }}
         >
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2.5" fill="none" style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 200ms ease' }}>
-            <polyline points="6 9 12 15 18 9"/>
+            <polyline points="6 9 12 15 18 9" />
           </svg>
         </button>
       </div>
@@ -209,7 +209,7 @@ function StageCard({ stage, index, isComplete, issueTypes, onAction, data }) {
 
 function renderCenterBlock(stage, metrics, warningCount, data) {
   const isWaiting = stage.status === 'waiting'
-  
+
   const SkeletonVal = ({ width }) => (
     <div className="skeleton-text" style={{ width, height: '14px', display: 'inline-block', verticalAlign: 'middle', opacity: 0.5 }} />
   )
@@ -497,7 +497,7 @@ function getStageIcon(stageId) {
       )
     default:
       return (
-        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
       )
   }
 }

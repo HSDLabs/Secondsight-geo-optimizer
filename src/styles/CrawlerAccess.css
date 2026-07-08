@@ -29,6 +29,8 @@
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 20px;
+  margin-left: 1.2rem;
+  margin-top: 1rem;
 }
 
 .crawler-section-header h2 {
