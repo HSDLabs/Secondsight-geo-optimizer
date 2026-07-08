@@ -10,8 +10,6 @@
 
 ![SecondSight GEO Optimizer](./screenshot.png)
 
-*(Note: Add a screenshot of the dashboard named `screenshot.png` to the root of this repository to display it here.)*
-
 ## Overview
 
 SecondSight GEO Optimizer is a professional-grade, dark-themed diagnostic dashboard built to evaluate how AI agents, large language models (LLMs), and traditional web crawlers interpret digital content. It shifts the focus from traditional SEO to **Generative Engine Optimization (GEO)** by simulating machine interpretation across multiple vectors.
