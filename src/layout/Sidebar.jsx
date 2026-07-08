@@ -19,11 +19,12 @@ export default function Sidebar({ isCollapsed, onToggle }) {
     <aside className="sidebar" aria-label="Primary" style={{ display: 'flex', flexDirection: 'column', height: '100%', paddingBottom: '16px' }}>
       <div>
         <div className="sidebar-brand" style={{ 
-          padding: isCollapsed ? '24px 0' : '24px 16px', 
+          padding: isCollapsed ? '12px 0' : '12px 10px', 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: isCollapsed ? 'center' : 'space-between',
-          minHeight: '80px'
+          minHeight: '60px',
+          marginBottom: '8px'
         }}>
           {!isCollapsed && (
             <div className="sidebar-brand-text" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>

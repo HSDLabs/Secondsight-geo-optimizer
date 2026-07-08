@@ -28,7 +28,7 @@ export default function UnderstandingFlow({ data, progressState, issueTypes = ne
                 key={stage.id}
                 className={`timeline-inline-step ${isStageComplete ? 'complete' : ''} ${stage.status === 'processing' ? 'active' : ''}`}
               >
-                <div className="timeline-inline-node" style={{ width: '100%', justifyContent: 'center' }}>
+                <div className="timeline-inline-node" style={{ width: '100%', justifyContent: 'center', position: 'relative', display: 'flex', alignItems: 'center', height: '18px' }}>
                   <span className="timeline-inline-dot">
                     {isStageComplete ? (
                       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '10px', height: '10px' }}>
@@ -38,7 +38,7 @@ export default function UnderstandingFlow({ data, progressState, issueTypes = ne
                       <span className="timeline-inline-dot-inner" style={{ background: stage.status === 'processing' ? stage.accent : 'rgba(255,255,255,0.1)' }} />
                     )}
                   </span>
-                  {index < stages.length - 1 && <span className="timeline-inline-line" style={{ background: isStageComplete ? 'var(--good)' : 'rgba(255,255,255,0.08)' }} />}
+                  {index < stages.length - 1 && <span className="timeline-inline-line" style={{ background: isStageComplete ? 'var(--good)' : 'rgba(255,255,255,0.08)', top: '9px', marginTop: '-0.75px', transform: 'none' }} />}
                 </div>
                 <span className="timeline-inline-label">{stage.title}</span>
               </div>
