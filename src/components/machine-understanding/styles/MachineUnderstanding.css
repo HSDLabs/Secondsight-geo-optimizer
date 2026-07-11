@@ -1,0 +1,145 @@
+.mu-page {
+  animation: mu-page-enter 360ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.mu-section-enter {
+  animation: mu-section-enter 420ms cubic-bezier(.2, .8, .2, 1) both;
+  animation-delay: var(--mu-section-delay, 0ms);
+}
+
+.mu-stagger-grid > * {
+  animation: mu-card-enter 420ms cubic-bezier(.2, .8, .2, 1) backwards;
+}
+
+.mu-stagger-grid > :nth-child(1) { animation-delay: 60ms; }
+.mu-stagger-grid > :nth-child(2) { animation-delay: 105ms; }
+.mu-stagger-grid > :nth-child(3) { animation-delay: 150ms; }
+.mu-stagger-grid > :nth-child(4) { animation-delay: 195ms; }
+.mu-stagger-grid > :nth-child(5) { animation-delay: 240ms; }
+.mu-stagger-grid > :nth-child(6) { animation-delay: 285ms; }
+.mu-stagger-grid > :nth-child(7) { animation-delay: 330ms; }
+.mu-stagger-grid > :nth-child(8) { animation-delay: 375ms; }
+.mu-stagger-grid > :nth-child(n + 9) { animation-delay: 420ms; }
+
+@media (hover: hover) and (pointer: fine) {
+  .mu-stagger-grid > * {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .mu-stagger-grid > *::after {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    inset: 0 auto 0 -55%;
+    width: 26%;
+    background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .008), transparent);
+    pointer-events: none;
+    transform: skewX(-18deg) translateX(0);
+    transition: transform 900ms cubic-bezier(.2, .7, .2, 1);
+  }
+
+  .mu-stagger-grid > *:hover::after {
+    transform: skewX(-18deg) translateX(600%);
+  }
+
+  .mu-no-sheen > *::after {
+    display: none;
+  }
+}
+
+.mu-tab-panel {
+  animation: mu-tab-enter 160ms ease-out both;
+}
+
+.mu-scan-pulse {
+  animation: mu-scan-pulse 1.5s ease-out infinite;
+}
+
+.mu-score-ring {
+  animation: mu-score-ring 760ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.mu-score-number {
+  animation: mu-score-number 420ms ease-out both;
+}
+
+.mu-tab-indicator {
+  animation: mu-tab-indicator 180ms ease-out both;
+}
+
+.mu-modal-backdrop {
+  animation: mu-modal-backdrop 180ms ease-out both;
+}
+
+.mu-modal-panel {
+  animation: mu-modal-panel 220ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+@keyframes mu-page-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes mu-section-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mu-card-enter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mu-tab-enter {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mu-scan-pulse {
+  70%, 100% { box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, .3); }
+}
+
+@keyframes mu-score-ring {
+  from { stroke-dashoffset: 239; opacity: .35; }
+}
+
+@keyframes mu-score-number {
+  from { opacity: 0; transform: translateY(4px); }
+}
+
+@keyframes mu-tab-indicator {
+  from { opacity: 0; transform: scaleX(.35); }
+}
+
+@keyframes mu-modal-backdrop {
+  from { opacity: 0; }
+}
+
+@keyframes mu-modal-panel {
+  from { opacity: 0; transform: translateY(8px) scale(.985); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mu-page,
+  .mu-section-enter,
+  .mu-stagger-grid > *,
+  .mu-tab-panel,
+  .mu-scan-pulse,
+  .mu-score-ring,
+  .mu-score-number,
+  .mu-tab-indicator,
+  .mu-modal-backdrop,
+  .mu-modal-panel {
+    animation: none;
+  }
+
+  .mu-issue-details {
+    transition: none;
+  }
+
+  .mu-stagger-grid > *::after {
+    display: none;
+  }
+}

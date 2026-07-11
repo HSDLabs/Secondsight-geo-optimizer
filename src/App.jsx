@@ -1,14 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
-import './styles/App.css'
-import './styles/VisibilityLayer.css'
-import './styles/Layout.css'
 import AppLayout from './layout/AppLayout'
-import SectionPlaceholder from './pages/SectionPlaceholder'
+import SectionPlaceholder from './components/common/SectionPlaceholder'
 import { navItems } from './navigation'
 import { useProgressiveAnalysis } from './hooks/useProgressiveAnalysis'
-import { getProgressMetrics } from './pages/ai-understanding/progressiveAnalysis'
-
+import { getProgressMetrics } from './components/machine-understanding/utils/progressiveAnalysis'
 import { computeVisibilityBreakdown } from './utils/scoring'
 
 export default function App() {
@@ -29,43 +25,7 @@ export default function App() {
   } = useProgressiveAnalysis()
 
   useEffect(() => {
-    // Light mode temporarily disabled by request
     document.documentElement.setAttribute('data-theme', 'dark')
-    
-    /*
-    const theme = localStorage.getItem('secondsight-theme') || 'system'
-    
-    const applyTheme = (t) => {
-      if (t === 'system') {
-        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light')
-      } else {
-        document.documentElement.setAttribute('data-theme', t)
-      }
-    }
-
-    applyTheme(theme)
-
-    const mql = window.matchMedia('(prefers-color-scheme: dark)')
-    const listener = () => {
-      if ((localStorage.getItem('secondsight-theme') || 'system') === 'system') {
-        applyTheme('system')
-      }
-    }
-    
-    mql.addEventListener('change', listener)
-    
-    // Also listen for changes from Settings page
-    const storageListener = () => {
-      applyTheme(localStorage.getItem('secondsight-theme') || 'system')
-    }
-    window.addEventListener('storage', storageListener)
-    
-    return () => {
-      mql.removeEventListener('change', listener)
-      window.removeEventListener('storage', storageListener)
-    }
-    */
   }, [])
 
   async function analyze(targetUrl) {
@@ -167,9 +127,6 @@ export default function App() {
     if (linkedNodeId) setSelectedNodeId(linkedNodeId)
   }
 
-  // Shared analysis state passed down to every section via the layout's
-  // Outlet context. Because it lives here (above the router outlet), one
-  // analysis stays live as the user navigates between sections.
   const outletContext = {
     data,
     loading,
@@ -185,7 +142,8 @@ export default function App() {
     selectIssueGroup,
     analysisProgress,
     crawlerData,
-    externalData
+    externalData,
+    reanalyze: () => analyze(url)
   }
 
   return (

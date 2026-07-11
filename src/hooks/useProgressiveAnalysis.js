@@ -3,7 +3,7 @@ import {
   analysisProgressReducer,
   buildSimulatedProgressPlan,
   createInitialAnalysisProgressState
-} from '../pages/ai-understanding/progressiveAnalysis'
+} from '../components/machine-understanding/utils/progressiveAnalysis'
 
 export function useProgressiveAnalysis() {
   const [progressState, dispatch] = useReducer(

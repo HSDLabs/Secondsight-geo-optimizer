@@ -30,6 +30,29 @@ SecondSight GEO Optimizer is a professional-grade, dark-themed diagnostic dashbo
 - **Deployment:** Railway
 - **Styling:** Custom Vanilla CSS with a bespoke design system
 
+## Frontend Structure
+
+The frontend is organized by feature so each route's UI, helpers, and styles stay together:
+
+```text
+src/
+├── components/
+│   ├── common/                  # Reusable UI and shared presentation helpers
+│   ├── icons/                   # Shared application icons
+│   ├── overview/                # Overview route, model, and styles
+│   ├── machine-understanding/   # Machine analysis route, fixes, helpers, and styles
+│   ├── crawler-access/          # Crawler diagnostics route, helpers, and styles
+│   ├── external-intelligence/   # External intelligence route and styles
+│   └── settings/                # Settings route
+├── layout/                      # Application shell, sidebar, header, and layout styles
+├── hooks/                       # Cross-feature React hooks
+├── styles/                      # Global styles and Tailwind entrypoint
+├── utils/                       # Cross-feature data utilities
+├── App.jsx                      # Shared analysis state and route rendering
+├── navigation.jsx               # Route and sidebar configuration
+└── main.jsx                     # Browser entrypoint
+```
+
 ## Getting Started
 
 ### Prerequisites

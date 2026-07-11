@@ -1,15 +1,9 @@
-import Overview from './pages/overview/Overview'
-import AIUnderstanding from './pages/ai-understanding/AIUnderstanding'
-import CrawlerAccess from './pages/crawler-access/CrawlerAccess'
-import Settings from './pages/settings/Settings'
-import ExternalIntelligence from './pages/external-intelligence/ExternalIntelligence'
+import Overview from './components/overview/Overview'
+import MachineUnderstanding from './components/machine-understanding/MachineUnderstanding'
+import CrawlerAccess from './components/crawler-access/CrawlerAccess'
+import Settings from './components/settings/Settings'
+import ExternalIntelligence from './components/external-intelligence/ExternalIntelligence'
 
-// Single source of truth for the app's navigation.
-// Both the Sidebar (grouped NavLinks) and the router (<Routes>) consume this list,
-// so adding a real section later is just swapping its `element`.
-//
-// Sections map to the GEO pipeline: Access -> Understand -> Content ->
-// Retrieval -> Citation, followed by synthesized outputs, a tool, and settings.
 export const NAV_GROUPS = ['Overview', 'Diagnostics', 'Insights', 'Tools', 'Settings']
 
 export const navItems = [
@@ -25,7 +19,7 @@ export const navItems = [
     label: 'Machine Understanding',
     group: 'Diagnostics',
     description: 'How well machines grasp the page structure, semantics, and entities.',
-    element: <AIUnderstanding />
+    element: <MachineUnderstanding />
   },
   {
     path: '/crawler-access',

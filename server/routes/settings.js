@@ -11,6 +11,7 @@ const envPath = path.join(__dirname, '..', '.env')
 const MANAGED_KEYS = [
   'GOOGLE_API_KEY',
   'SCRAPEBADGER_API_KEY',
+  'OPENAI_API_KEY',
   'CHATGPT_API_KEY'
 ]
 
@@ -47,7 +48,7 @@ router.get('/env', async (req, res) => {
       safeEnv[key] = envObj[key] || ''
     })
     res.json(safeEnv)
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to read env file' })
   }
 })
@@ -66,7 +67,7 @@ router.post('/env', async (req, res) => {
     
     await writeEnv(envObj)
     res.json({ success: true })
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to update env file' })
   }
 })

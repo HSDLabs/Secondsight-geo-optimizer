@@ -1,6 +1,6 @@
 import { createElement } from 'react'
 
-export const APP_ICON_DEFAULTS = {
+const APP_ICON_DEFAULTS = {
   size: 15,
   strokeWidth: 1.7,
   'aria-hidden': true,

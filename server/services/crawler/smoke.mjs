@@ -1,5 +1,6 @@
 // Quick inline test — run with: node server/services/crawler/smoke.mjs
 import { parseRobotsTxt, isPathAllowed } from './robotsParser.js'
+import assert from 'node:assert/strict'
 
 // Test 1: robots.txt parsing
 const robots = parseRobotsTxt(`
@@ -24,10 +25,10 @@ console.log('Sitemap refs:', robots.sitemapReferences)
 console.log('Crawl delays:', robots.crawlDelays)
 console.log('AI permissions:', JSON.stringify(robots.aiCrawlerPermissions, null, 2))
 
-console.assert(robots.groups.length >= 3, 'Should have at least 3 groups')
-console.assert(robots.aiCrawlerPermissions.GPTBot === 'blocked', 'GPTBot should be blocked')
-console.assert(robots.aiCrawlerPermissions.ClaudeBot === 'allowed', 'ClaudeBot should be allowed')
-console.assert(robots.sitemapReferences.length === 1, 'Should have 1 sitemap ref')
+assert.ok(robots.groups.length >= 3, 'Should have at least 3 groups')
+assert.equal(robots.aiCrawlerPermissions.GPTBot, 'blocked')
+assert.equal(robots.aiCrawlerPermissions.ClaudeBot, 'allowed')
+assert.equal(robots.sitemapReferences.length, 1)
 
 // Test 2: path matching
 console.log('\n=== Test 2: path matching ===')
@@ -37,9 +38,9 @@ const gptBlocked = isPathAllowed(robots.groups, 'GPTBot', '/')
 console.log('/public/page for *:', allowed1, '(expected: true)')
 console.log('/private/secret for *:', blocked1, '(expected: false)')
 console.log('/ for GPTBot:', gptBlocked, '(expected: false)')
-console.assert(allowed1 === true)
-console.assert(blocked1 === false)
-console.assert(gptBlocked === false)
+assert.equal(allowed1, true)
+assert.equal(blocked1, false)
+assert.equal(gptBlocked, false)
 
 // Test 3: issue detector (unit)
 import { detectIssues } from './issueDetector.js'
@@ -61,7 +62,20 @@ const issues = detectIssues({
     pageSignals: [],
     summary: {}
   },
-  origin: 'https://example.com'
+  origin: 'https://example.com',
+  urlInspection: {
+    issues: [{
+      id: 'crawler-policy-gptbot-smoke',
+      type: 'ai-crawler-blocked',
+      severity: 'critical',
+      confidence: 'definite',
+      affectedUrls: ['https://example.com/'],
+      evidence: 'Disallow: /',
+      recommendation: 'Review the GPTBot rule.',
+      crawlerAffected: ['GPTBot'],
+      source: 'robots.txt'
+    }]
+  }
 })
 
 console.log('\n=== Test 3: issue detection ===')
@@ -69,7 +83,7 @@ console.log('Issues found:', issues.length)
 for (const i of issues) {
   console.log(`  [${i.severity}] ${i.type}: ${i.evidence.slice(0, 60)}`)
 }
-console.assert(issues.some(i => i.type === 'ai-crawler-blocked'), 'Should detect GPTBot blocked')
-console.assert(issues.some(i => i.type === 'sitemap-not-found'), 'Should detect missing sitemap')
+assert.ok(issues.some(i => i.type === 'ai-crawler-blocked'), 'Should detect GPTBot blocked')
+assert.ok(issues.some(i => i.type === 'sitemap-not-found'), 'Should detect missing sitemap')
 
-console.log('\n✅ All unit tests passed!')
+console.log('\n All unit tests passed!')

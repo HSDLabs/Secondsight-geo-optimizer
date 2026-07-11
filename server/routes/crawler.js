@@ -1,8 +1,33 @@
-/* global Buffer, process */
 import { Router } from 'express'
 import { analyzeCrawler } from '../services/crawler/index.js'
+import { analyzeStandaloneInspection } from '../services/crawler/urlInspector.js'
+import { generateOrReviewLlmsTxt } from '../services/crawler/llmsTxt.js'
 
 const router = Router()
+
+router.post('/llms-txt', async (req, res) => {
+  try {
+    const result = await generateOrReviewLlmsTxt(req.body || {})
+    res.json(result)
+  } catch (error) {
+    const validation = error instanceof TypeError
+    const missingKey = error.message.includes('API key')
+    res.status(validation ? 400 : missingKey ? 503 : 502).json({ error: error.message })
+  }
+})
+
+router.post('/test-access', async (req, res) => {
+  const { url, origin } = req.body || {}
+  if (!url || !origin) return res.status(400).json({ error: 'URL and analyzed origin are required.' })
+
+  try {
+    const result = await analyzeStandaloneInspection({ url, expectedOrigin: origin })
+    res.json(result)
+  } catch (error) {
+    const isValidationError = error instanceof TypeError || error.message.includes('analyzed site origin')
+    res.status(isValidationError ? 400 : 500).json({ error: error.message })
+  }
+})
 
 router.post('/', async (req, res) => {
   // Fallback manual body parser if middleware was bypassed or Content-Type is missing

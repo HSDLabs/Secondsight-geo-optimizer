@@ -1,232 +1,130 @@
-/**
- * robotsParser.js — Parse robots.txt into a structured model.
- *
- * Produces:
- *   - Per-user-agent rule groups (allow / disallow)
- *   - Crawl delays
- *   - Sitemap references declared in robots.txt
- *   - AI crawler permissions for each known AI bot
- *
- * This is a line-by-line parser — no external dependency needed.
- */
+import { CRAWLER_CATALOG } from '../../../shared/crawlers.js'
 
-/**
- * Well-known AI crawlers we specifically track.
- */
-export const AI_CRAWLERS = [
-  'GPTBot',
-  'ChatGPT-User',
-  'ClaudeBot',
-  'Google-Extended',
-  'PerplexityBot',
-  'Bytespider',
-  'CCBot',
-  'Applebot',
-  'Bingbot',
-  'Googlebot'
-]
+export const AI_CRAWLERS = CRAWLER_CATALOG.map(crawler => crawler.token)
 
-/**
- * Parse a raw robots.txt string into a structured model.
- *
- * @param {string} raw — The full text of robots.txt
- * @returns {object} Parsed result
- */
 export function parseRobotsTxt(raw) {
-  const lines = raw.split(/\r?\n/)
-
-  /** @type {{ userAgent: string, rules: { type: 'allow'|'disallow', path: string }[] }[]} */
+  const lines = String(raw || '').replace(/^\uFEFF/, '').split(/\r?\n/)
   const groups = []
-  const sitemapRefs = []
+  const sitemapReferences = []
   const crawlDelays = {}
-
   let currentAgents = []
   let currentRules = []
 
-  for (const rawLine of lines) {
-    const line = rawLine.trim()
-
-    // Skip blank lines and comments
-    if (!line || line.startsWith('#')) {
-      // A blank line between groups: flush current
-      if (line === '' && currentAgents.length > 0 && currentRules.length > 0) {
-        flushGroup()
-      }
-      continue
-    }
-
-    const colonIndex = line.indexOf(':')
-    if (colonIndex === -1) continue
-
-    const directive = line.slice(0, colonIndex).trim().toLowerCase()
-    const value = line.slice(colonIndex + 1).trim()
-
-    switch (directive) {
-      case 'user-agent': {
-        // If we already have rules queued, this is a new group
-        if (currentRules.length > 0) flushGroup()
-        currentAgents.push(value)
-        break
-      }
-
-      case 'disallow': {
-        if (value !== '') {
-          currentRules.push({ type: 'disallow', path: value })
-        }
-        break
-      }
-
-      case 'allow': {
-        if (value !== '') {
-          currentRules.push({ type: 'allow', path: value })
-        }
-        break
-      }
-
-      case 'crawl-delay': {
-        const delay = parseFloat(value)
-        if (!isNaN(delay)) {
-          for (const agent of currentAgents.length > 0 ? currentAgents : ['*']) {
-            crawlDelays[agent] = delay
-          }
-        }
-        break
-      }
-
-      case 'sitemap': {
-        if (value) sitemapRefs.push(value)
-        break
-      }
-
-      // Ignore unknown directives (host, noindex, etc.)
-      default:
-        break
-    }
-  }
-
-  // Flush any remaining group
-  flushGroup()
-
-  // Derive AI crawler permissions from the parsed groups
-  const aiCrawlerPermissions = deriveAiPermissions(groups)
-
-  return {
-    raw,
-    groups,
-    sitemapReferences: sitemapRefs,
-    crawlDelays,
-    aiCrawlerPermissions
-  }
-
-  function flushGroup() {
-    if (currentAgents.length === 0 && currentRules.length > 0) {
-      currentAgents = ['*']
-    }
-    if (currentAgents.length > 0) {
-      for (const agent of currentAgents) {
-        groups.push({
-          userAgent: agent,
-          rules: [...currentRules]
-        })
-      }
+  const flushGroup = () => {
+    if (currentAgents.length === 0) return
+    for (const userAgent of currentAgents) {
+      groups.push({ userAgent, rules: currentRules.map(rule => ({ ...rule })) })
+      if (currentRules.crawlDelay != null) crawlDelays[userAgent] = currentRules.crawlDelay
     }
     currentAgents = []
     currentRules = []
   }
+
+  lines.forEach((rawLine, index) => {
+    const withoutComment = rawLine.split('#', 1)[0].trim()
+    if (!withoutComment) return
+    const colonIndex = withoutComment.indexOf(':')
+    if (colonIndex < 0) return
+    const directive = withoutComment.slice(0, colonIndex).trim().toLowerCase()
+    const value = withoutComment.slice(colonIndex + 1).trim()
+
+    if (directive === 'user-agent') {
+      if (currentRules.length > 0) flushGroup()
+      if (value) currentAgents.push(value)
+      return
+    }
+    if (directive === 'sitemap') {
+      if (value) sitemapReferences.push(value)
+      return
+    }
+    if (directive === 'crawl-delay') {
+      const delay = Number.parseFloat(value)
+      if (Number.isFinite(delay)) {
+        for (const agent of currentAgents.length ? currentAgents : ['*']) crawlDelays[agent] = delay
+      }
+      return
+    }
+    if ((directive === 'allow' || directive === 'disallow') && currentAgents.length > 0 && value) {
+      currentRules.push({ type: directive, path: value, line: index + 1 })
+    }
+  })
+  flushGroup()
+
+  const aiCrawlerPermissions = Object.fromEntries(CRAWLER_CATALOG.map(crawler => {
+    const result = evaluateCrawler(groups, crawler.token, '/')
+    return [crawler.token, result.coverage === 'none' ? 'blocked' : result.coverage === 'partial' ? 'partially-blocked' : 'allowed']
+  }))
+
+  return { raw, groups, sitemapReferences: [...new Set(sitemapReferences)], crawlDelays, aiCrawlerPermissions }
 }
 
-/**
- * Determine the effective permission for each AI crawler.
- *
- * Resolution order (same as Google's spec):
- * 1. Look for a group matching the exact bot name (case-insensitive).
- * 2. Fall back to the wildcard (*) group.
- * 3. If no matching group exists → 'allowed' (open by default).
- *
- * Possible values: 'allowed' | 'blocked' | 'partially-blocked'
- */
-function deriveAiPermissions(groups) {
-  const result = {}
-
-  for (const crawler of AI_CRAWLERS) {
-    const specific = groups.find(
-      g => g.userAgent.toLowerCase() === crawler.toLowerCase()
-    )
-    const wildcard = groups.find(g => g.userAgent === '*')
-
-    const effectiveGroup = specific || wildcard
-
-    if (!effectiveGroup || effectiveGroup.rules.length === 0) {
-      result[crawler] = 'allowed'
-      continue
-    }
-
-    const disallows = effectiveGroup.rules.filter(r => r.type === 'disallow')
-    const allows = effectiveGroup.rules.filter(r => r.type === 'allow')
-
-    // Disallow: / with no allows → fully blocked
-    const blocksRoot = disallows.some(r => r.path === '/')
-
-    if (blocksRoot && allows.length === 0) {
-      result[crawler] = 'blocked'
-    } else if (disallows.length > 0) {
-      result[crawler] = 'partially-blocked'
-    } else {
-      result[crawler] = 'allowed'
-    }
+export function evaluateCrawler(groups, userAgent, urlOrPath, robotsState = 'available') {
+  if (robotsState === 'unreachable') {
+    return { access: 'unknown', coverage: 'unknown', ruleSource: 'unreachable', matchedRule: null, effectiveRules: [] }
   }
 
-  return result
+  const token = userAgent.toLowerCase()
+  const specificGroups = groups.filter(group => group.userAgent.toLowerCase() === token)
+  const wildcardGroups = groups.filter(group => group.userAgent === '*')
+  const selectedGroups = specificGroups.length ? specificGroups : wildcardGroups
+  const effectiveRules = selectedGroups.flatMap(group => group.rules.map(rule => ({ ...rule, userAgent: group.userAgent })))
+  const ruleSource = specificGroups.length ? 'specific' : wildcardGroups.length ? 'wildcard' : robotsState === 'missing' ? 'missing' : 'default'
+  const disallows = effectiveRules.filter(rule => rule.type === 'disallow')
+  const coverage = disallows.length === 0 ? 'full' : isEntireSiteBlocked(effectiveRules) ? 'none' : 'partial'
+  const target = normalizeTarget(urlOrPath)
+  const matches = effectiveRules
+    .map(rule => ({ rule, matchLength: matchRule(target, rule.path) }))
+    .filter(match => match.matchLength >= 0)
+    .sort((a, b) => b.matchLength - a.matchLength || (a.rule.type === 'allow' ? -1 : 1))
+  const matchedRule = matches[0]?.rule || null
+
+  return {
+    access: matchedRule?.type === 'disallow' ? 'blocked' : 'allowed',
+    coverage,
+    ruleSource,
+    matchedRule,
+    effectiveRules
+  }
 }
 
-/**
- * Check if a specific path is allowed for a given user-agent
- * based on the parsed robots groups.
- *
- * Implements longest-match-wins rule.
- */
 export function isPathAllowed(groups, userAgent, path) {
-  // Find the most specific matching group
-  const specific = groups.find(
-    g => g.userAgent.toLowerCase() === userAgent.toLowerCase()
-  )
-  const wildcard = groups.find(g => g.userAgent === '*')
-  const group = specific || wildcard
-
-  if (!group || group.rules.length === 0) return true
-
-  // Find the longest matching rule
-  let bestMatch = null
-  let bestLength = -1
-
-  for (const rule of group.rules) {
-    if (pathMatches(path, rule.path) && rule.path.length > bestLength) {
-      bestMatch = rule
-      bestLength = rule.path.length
-    }
-  }
-
-  if (!bestMatch) return true
-  return bestMatch.type === 'allow'
+  return evaluateCrawler(groups, userAgent, path).access === 'allowed'
 }
 
-/**
- * Simple robots.txt path matching.
- * Supports trailing * wildcard and $ end anchor.
- */
-function pathMatches(actualPath, rulePath) {
-  let pattern = rulePath
+function isEntireSiteBlocked(rules) {
+  if (rules.some(rule => rule.type === 'allow')) return false
+  const root = rules
+    .map(rule => ({ rule, matchLength: matchRule('/', rule.path) }))
+    .filter(match => match.matchLength >= 0)
+    .sort((a, b) => b.matchLength - a.matchLength || (a.rule.type === 'allow' ? -1 : 1))[0]
+  return root?.rule.type === 'disallow'
+}
 
-  // $ anchor at the end means exact match
-  if (pattern.endsWith('$')) {
-    pattern = pattern.slice(0, -1)
-    return actualPath === pattern
+function normalizeTarget(value) {
+  try {
+    const url = new URL(value, 'https://robots.invalid')
+    return normalizeOctets(`${url.pathname}${url.search}`)
+  } catch {
+    return normalizeOctets(String(value || '/').startsWith('/') ? String(value || '/') : `/${value}`)
   }
+}
 
-  // Trailing * is implicit anyway, but handle explicit *
-  if (pattern.endsWith('*')) {
-    pattern = pattern.slice(0, -1)
-  }
+function normalizeOctets(value) {
+  return encodeURI(decodeURI(value)).replace(/%([0-9a-f]{2})/gi, (_, hex) => {
+    const char = String.fromCharCode(Number.parseInt(hex, 16))
+    return /[A-Za-z0-9\-._~]/.test(char) ? char : `%${hex.toUpperCase()}`
+  })
+}
 
-  return actualPath.startsWith(pattern)
+function matchRule(target, rawPattern) {
+  const normalized = normalizeOctets(rawPattern)
+  const anchored = normalized.endsWith('$')
+  const pattern = anchored ? normalized.slice(0, -1) : normalized
+  const expression = pattern.split('*').map(escapeRegExp).join('.*')
+  const regex = new RegExp(`^${expression}${anchored ? '$' : ''}`)
+  return regex.test(target) ? pattern.replace(/\*/g, '').length : -1
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[|\\{}()[\]^$+?.]/g, '\\$&')
 }

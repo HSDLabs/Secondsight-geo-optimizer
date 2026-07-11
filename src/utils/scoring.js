@@ -100,11 +100,6 @@ export function computeVisibilityBreakdown(data) {
   }
 }
 
-export function computeCrawlerScore(crawlerData) {
-  if (!crawlerData) return null;
-  return crawlerData.score;
-}
-
 export function computeOverallScore(visibilityScore, crawlerScore, externalScore) {
   const availableScores = [];
   if (visibilityScore != null) availableScores.push(visibilityScore);

@@ -56,7 +56,7 @@ export async function probePages(urls, origin) {
     .filter(r => r.ok && r.body)
     .map(r => ({
       url: r.url,
-      ...extractHtmlSignals(r.body, r.url)
+      ...extractHtmlSignals(r.body, r.url, r.headers)
     }))
 
   // Build summary
@@ -81,7 +81,7 @@ export async function probePages(urls, origin) {
 /**
  * Extract crawl-relevant signals from an HTML page body.
  */
-function extractHtmlSignals(html, pageUrl) {
+export function extractHtmlSignals(html, pageUrl, headers = {}) {
   const result = {
     canonical: null,
     metaRobots: null,
@@ -89,8 +89,12 @@ function extractHtmlSignals(html, pageUrl) {
     nofollow: false,
     hreflang: [],
     title: null,
-    pagination: { prev: null, next: null }
+    pagination: { prev: null, next: null },
+    internalLinks: [],
+    xRobotsTag: headers['x-robots-tag'] || null
   }
+
+  if (result.xRobotsTag?.toLowerCase().includes('noindex')) result.noindex = true
 
   // Extract <title>
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)
@@ -162,6 +166,20 @@ function extractHtmlSignals(html, pageUrl) {
   )
   if (prevMatch) result.pagination.prev = prevMatch[1]
   if (nextMatch) result.pagination.next = nextMatch[1]
+
+  const origin = (() => { try { return new URL(pageUrl).origin } catch { return '' } })()
+  const links = new Set()
+  const anchorRegex = /<a\b[^>]*\bhref\s*=\s*["']([^"']+)["'][^>]*>/gi
+  let anchorMatch
+  while ((anchorMatch = anchorRegex.exec(html)) !== null && links.size < 100) {
+    try {
+      const link = new URL(anchorMatch[1], pageUrl)
+      if (link.origin !== origin || !['http:', 'https:'].includes(link.protocol)) continue
+      link.hash = ''
+      links.add(link.href)
+    } catch { /* Ignore invalid and non-HTTP links. */ }
+  }
+  result.internalLinks = [...links]
 
   return result
 }

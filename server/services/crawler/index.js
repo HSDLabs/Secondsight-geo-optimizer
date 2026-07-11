@@ -10,6 +10,10 @@ import { parseRobotsTxt } from './robotsParser.js'
 import { parseSitemaps } from './sitemapParser.js'
 import { probePages } from './pageProber.js'
 import { detectIssues } from './issueDetector.js'
+import { inspectCrawlerUrl } from './urlInspector.js'
+import { analyzeRobotsTxt } from './robotsAnalyzer.js'
+import { classifySitemapUrls } from './sitemapSummary.js'
+import { inspectLlmsTxt } from './llmsTxt.js'
 
 /**
  * Run the full crawler analysis pipeline for a URL.
@@ -30,7 +34,7 @@ export async function analyzeCrawler(targetUrl) {
 
   // 2. Fetch & parse robots.txt
   const robotsUrl = `${origin}/robots.txt`
-  const robotsRes = await fetchText(robotsUrl)
+  const [robotsRes, llmsTxt] = await Promise.all([fetchText(robotsUrl), inspectLlmsTxt(origin)])
   const robotsFound = robotsRes.ok && robotsRes.status === 200
   const robotsParsed = robotsFound ? parseRobotsTxt(robotsRes.body) : null
 
@@ -40,7 +44,8 @@ export async function analyzeCrawler(targetUrl) {
     status: robotsRes.status,
     timing: robotsRes.timing,
     parsed: robotsParsed,
-    raw: robotsFound ? robotsRes.body : null
+    raw: robotsFound ? robotsRes.body : null,
+    error: robotsRes.error
   }
 
   // 3. Fetch & parse sitemaps
@@ -54,10 +59,20 @@ export async function analyzeCrawler(targetUrl) {
   ]
   const pages = await probePages(urlsToProbe, origin)
 
-  // 5. Detect issues
-  const issues = detectIssues({ robots, sitemaps, pages, origin })
+  const robotsAnalysis = robotsFound
+    ? analyzeRobotsTxt(robotsRes.body, { sitemapErrors: sitemaps.errors, lastModified: robotsRes.headers?.['last-modified'] || null })
+    : analyzeRobotsTxt('', { lastModified: null })
+  const sitemapClassification = classifySitemapUrls({ urls: sitemaps.urls, pages, robots })
 
-  // 6. Calculate score
+  // 5. Build the URL-level crawler matrix and shared rendered-page evidence.
+  const urlInspection = await inspectCrawlerUrl({ url: targetUrl, origin, robots, sitemaps })
+
+  // 6. Detect issues
+  const detectedIssues = detectIssues({ robots, sitemaps, pages, origin, urlInspection })
+  const llmsIssues = buildLlmsIssues(llmsTxt)
+  const issues = [...new Map([...detectedIssues, ...robotsAnalysis.issues, ...llmsIssues].map(issue => [issue.id, issue])).values()]
+
+  // 7. Calculate score
   const { score, scoreBreakdown } = calculateScore(robots, sitemaps, pages, issues)
 
   const elapsed = Date.now() - startTime
@@ -76,12 +91,16 @@ export async function analyzeCrawler(targetUrl) {
       rules: robotsParsed?.groups || [],
       sitemapReferences: robotsParsed?.sitemapReferences || [],
       crawlDelays: robotsParsed?.crawlDelays || {},
-      aiCrawlerPermissions: robotsParsed?.aiCrawlerPermissions || {}
+      aiCrawlerPermissions: robotsParsed?.aiCrawlerPermissions || {},
+      analysis: robotsAnalysis,
+      error: robots.error
     },
     sitemaps: {
       discovered: sitemaps.discovered,
       totalUrls: sitemaps.totalUrls,
-      urls: sitemaps.urls.slice(0, 500), // Cap for response size
+      urls: sitemapClassification.urls.slice(0, 500), // Cap for response size
+      responseCapped: sitemapClassification.urls.length > 500,
+      summary: sitemapClassification.summary,
       health: sitemaps.health,
       errors: sitemaps.errors
     },
@@ -94,8 +113,42 @@ export async function analyzeCrawler(targetUrl) {
     },
     score,
     scoreBreakdown,
+    urlInspection,
+    llmsTxt,
     issues
   }
+}
+
+export function buildLlmsIssues(llmsTxt) {
+  if (!llmsTxt?.found) {
+    return [{
+      id: 'llms-txt-missing',
+      type: 'llms-txt-missing',
+      title: 'Missing llms.txt',
+      severity: 'info',
+      confidence: 'definite',
+      affectedUrls: [llmsTxt?.url].filter(Boolean),
+      evidence: llmsTxt?.error || 'No llms.txt file was found at the site root.',
+      recommendation: 'Review the analyzed evidence and publish a concise llms.txt file if it supports your AI-discovery strategy.',
+      crawlerAffected: ['OAI-SearchBot', 'Claude-SearchBot', 'PerplexityBot'],
+      source: 'llms.txt'
+    }]
+  }
+  if ((llmsTxt.validation?.score || 0) < 75 || llmsTxt.validation?.gaps?.length) {
+    return [{
+      id: 'llms-txt-needs-improvement',
+      type: 'llms-txt-needs-improvement',
+      title: 'llms.txt needs improvement',
+      severity: 'info',
+      confidence: 'high',
+      affectedUrls: [llmsTxt.url],
+      evidence: `Validation score: ${llmsTxt.validation?.score || 0}/100. ${(llmsTxt.validation?.gaps || []).join(' ')}`.trim(),
+      recommendation: 'Review the existing file and improve its title, summary, sections, and curated resource links without replacing useful content.',
+      crawlerAffected: ['OAI-SearchBot', 'Claude-SearchBot', 'PerplexityBot'],
+      source: 'llms.txt'
+    }]
+  }
+  return []
 }
 
 /**
