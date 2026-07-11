@@ -25,7 +25,7 @@ export default function URLInput({ value, onChange, onAnalyze, loading = false }
           id="analysis-url"
           value={value}
           onChange={event => onChange(event.target.value)}
-          placeholder="Enter a website URL — https://example.com"
+          placeholder="Enter Website URL"
           inputMode="url"
           autoComplete="url"
           readOnly={loading}

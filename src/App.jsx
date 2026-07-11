@@ -185,7 +185,8 @@ export default function App() {
     selectIssueGroup,
     analysisProgress,
     crawlerData,
-    externalData
+    externalData,
+    reanalyze: () => analyze(url)
   }
 
   return (

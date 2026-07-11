@@ -1,5 +1,6 @@
 export async function extractAccessibility(page) {
-  return page.evaluate(() => {
+  const [domAnalysis, ariaSnapshot] = await Promise.all([
+    page.evaluate(() => {
     const importantTags = [
       'header',
       'nav',
@@ -439,10 +440,58 @@ export async function extractAccessibility(page) {
       issues: snapshot.issues
     }
 
+    const allImages = [...document.querySelectorAll('img')]
+    const contentImages = allImages.filter(img => {
+      const role = img.getAttribute('role')
+      return img.getAttribute('aria-hidden') !== 'true' && role !== 'presentation' && role !== 'none'
+    })
+    const imagesWithAlt = contentImages.filter(img => Boolean(img.getAttribute('alt')?.trim())).length
+    const labeledControls = [...document.querySelectorAll('button, input:not([type="hidden"]), select, textarea')]
+      .filter(element => Boolean(getAccessibleName(element))).length
+    const counts = selector => document.querySelectorAll(selector).length
+    const landmarkRoles = ['header', 'nav', 'main', 'aside', 'footer']
+    const landmarkBreakdown = Object.fromEntries(landmarkRoles.map(role => [
+      role,
+      counts(`${role}, [role="${role === 'header' ? 'banner' : role === 'nav' ? 'navigation' : role === 'aside' ? 'complementary' : role === 'footer' ? 'contentinfo' : role}"]`)
+    ]))
+    const headingOutline = [...document.querySelectorAll('h1, h2, h3, h4, h5, h6')]
+      .map(heading => ({
+        level: Number(heading.tagName.slice(1)),
+        text: heading.textContent?.replace(/\s+/g, ' ').trim().slice(0, 120) || '',
+        id: heading.id || ''
+      }))
+      .filter(heading => heading.text)
+      .slice(0, 40)
+    const hiddenElements = [...document.querySelectorAll('[hidden], [aria-hidden="true"]')]
+      .filter(element => element.textContent?.trim() || element.querySelector('img, svg, video')).length
+
     return {
       snapshot,
       issues,
-      semanticIndex
+      semanticIndex,
+      stats: {
+        landmarks: counts('header, nav, main, aside, footer, [role="banner"], [role="navigation"], [role="main"], [role="complementary"], [role="contentinfo"]'),
+        headings: counts('h1, h2, h3, h4, h5, h6'),
+        links: counts('a'),
+        buttons: counts('button'),
+        forms: counts('form'),
+        images: contentImages.length,
+        totalNodes: Object.keys(semanticIndex).length,
+        landmarkBreakdown,
+        headingOutline,
+        controls: counts('button, input:not([type="hidden"]), select, textarea'),
+        labeledControls,
+        imagesWithAlt,
+        altCoverage: contentImages.length ? Math.round((imagesWithAlt / contentImages.length) * 100) : null,
+        explicitlyHiddenElements: hiddenElements
+      }
     }
-  })
+    }),
+    page.locator('body').ariaSnapshot().catch(() => '')
+  ])
+
+  return {
+    ...domAnalysis,
+    ariaSnapshot
+  }
 }

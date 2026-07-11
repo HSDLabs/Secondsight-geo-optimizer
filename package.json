@@ -10,6 +10,7 @@
     "start": "node server/index.js",
     "server": "nodemon server/index.js",
     "lint": "eslint .",
+    "test:crawler": "node --test server/services/crawler/*.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

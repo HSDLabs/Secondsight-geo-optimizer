@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 
 const BracesIcon = () => (
   <span style={{ fontFamily: 'monospace', color: 'var(--muted)', fontSize: '1rem', marginRight: '12px', opacity: 0.7 }}>
@@ -56,7 +56,7 @@ const EnvVarRow = ({ name, value, description, onSave }) => {
     : (value ? '********' : 'Not set')
 
   return (
-    <div style={{ 
+    <div title={description} style={{
       display: 'flex', 
       alignItems: 'center', 
       padding: '12px 16px', 
@@ -207,6 +207,7 @@ export default function Settings() {
   const [env, setEnv] = useState({
     GOOGLE_API_KEY: '',
     SCRAPEBADGER_API_KEY: '',
+    OPENAI_API_KEY: '',
     CHATGPT_API_KEY: ''
   })
   const [isLoadingEnv, setIsLoadingEnv] = useState(true)
@@ -312,6 +313,13 @@ export default function Settings() {
               value={env.SCRAPEBADGER_API_KEY}
               onSave={handleSaveEnv}
               description="Provides robust, proxy-backed cloud headless browsing. Used by the Crawler Access module to test how various AI bots render and parse your site."
+            />
+
+            <EnvVarRow
+              name="OPENAI_API_KEY"
+              value={env.OPENAI_API_KEY}
+              onSave={handleSaveEnv}
+              description="Used server-side by the llms.txt assistant through the OpenAI Responses API."
             />
 
             <EnvVarRow 

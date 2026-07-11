@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { renderPage } from '../services/layers/playwright.js'
 import { extractAccessibility } from '../services/layers/accessibility.js'
 import { extractReadable } from '../services/layers/readability.js'
+import { extractMetadata } from '../services/layers/metadata.js'
 
 const router = Router()
 
@@ -21,9 +22,10 @@ router.post('/', async (req, res) => {
       title
     } = await renderPage(url)
     browser = b
-    const [a11y, readable] = await Promise.all([
+    const [a11y, readable, metadata] = await Promise.all([
       extractAccessibility(page),
-      Promise.resolve(extractReadable(html, url))
+      Promise.resolve(extractReadable(html, url)),
+      Promise.resolve(extractMetadata(html, url))
     ])
     await browser.close()
 
@@ -34,7 +36,8 @@ router.post('/', async (req, res) => {
       screenshots,
       screenshotMeta,
       a11y,
-      readable
+      readable,
+      metadata
     })
   } catch (err) {
     console.error(err)

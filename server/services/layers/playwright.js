@@ -54,3 +54,39 @@ export async function renderPage(url) {
     title
   }
 }
+
+export async function renderInspectionPage(url) {
+  const browser = await chromium.launch()
+  const page = await browser.newPage({
+    viewport: { width: 1280, height: 720 },
+    userAgent: USER_AGENT
+  })
+
+  try {
+    const response = await gotoPage(page, url)
+    await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {})
+    const html = await page.content()
+    const bodyText = await page.locator('body').innerText().catch(() => '')
+    const redirects = []
+    let request = response?.request()
+    while (request?.redirectedFrom()) {
+      const previous = request.redirectedFrom()
+      redirects.unshift({ from: previous.url(), to: request.url() })
+      request = previous
+    }
+
+    return {
+      html,
+      bodyText,
+      status: response?.status() || 0,
+      finalUrl: page.url(),
+      redirects,
+      headers: response ? await response.allHeaders() : {},
+      error: null
+    }
+  } catch (error) {
+    return { html: '', bodyText: '', status: 0, finalUrl: url, redirects: [], headers: {}, error: error.message }
+  } finally {
+    await browser.close()
+  }
+}

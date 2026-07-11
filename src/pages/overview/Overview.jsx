@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { NavLink, useOutletContext } from 'react-router-dom'
 import { ArrowRight, Sparkles } from 'lucide-react'
-import { RecommendationsIcon, SuccessIcon } from '../../components/icons'
+import { OverviewIcon, RecommendationsIcon, SuccessIcon } from '../../components/icons'
 import '../../styles/Overview.css'
 import { buildOverviewModel, verdictFor } from './overviewModel'
 import {
@@ -50,7 +50,7 @@ export default function Overview() {
       <header className="overview-intro">
         <div>
           <span className="overview-eyebrow"><Sparkles size={13} strokeWidth={1.7} /> AI visibility overview</span>
-          <h1>{hasResults ? 'Your visibility, explained.' : 'Understand how AI sees your site.'}</h1>
+          <div className="overview-title-row"><span className="overview-title-icon"><OverviewIcon size={21} strokeWidth={1.8} /></span><h1>{hasResults ? 'Your visibility, explained.' : 'Understand how AI sees your site.'}</h1></div>
           <p>{hasResults ? `A prioritized view of the signals shaping ${data?.url || 'your site'} across AI discovery and understanding.` : 'Run a scan to turn technical, content, and authority signals into a clear action plan.'}</p>
         </div>
         {analyzedLabel && <span className="overview-last-scan">Last scan {analyzedLabel}</span>}

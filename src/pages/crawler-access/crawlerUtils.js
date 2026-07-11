@@ -1,318 +1,101 @@
-// Well-known AI crawlers we track (matches backend)
-export const AI_CRAWLERS = [
-  { name: 'Googlebot', ua: 'Googlebot', desc: "Google's primary search crawler.", avatarClass: 'google', letter: 'G' },
-  { name: 'GPTBot', ua: 'GPTBot', desc: "OpenAI's crawler for training data.", avatarClass: 'openai', letter: 'O' },
-  { name: 'ClaudeBot', ua: 'ClaudeBot', desc: "Anthropic's crawler for Claude models.", avatarClass: 'anthropic', letter: 'A' },
-  { name: 'PerplexityBot', ua: 'PerplexityBot', desc: "Perplexity AI's search and citation crawler.", avatarClass: '', letter: 'P' },
-  { name: 'Bytespider', ua: 'Bytespider', desc: "ByteDance's AI and search index crawler.", avatarClass: '', letter: 'B' },
-  { name: 'Applebot', ua: 'Applebot', desc: "Apple's search and Siri intelligence crawler.", avatarClass: '', letter: 'A' },
-  { name: 'Bingbot', ua: 'Bingbot', desc: "Microsoft Bing's web indexing crawler.", avatarClass: '', letter: 'B' },
-  { name: 'Google-Extended', ua: 'Google-Extended', desc: "Google's token to opt-out of Gemini training.", avatarClass: 'google', letter: 'G' },
-  { name: 'ChatGPT-User', ua: 'ChatGPT-User', desc: "OpenAI's user-initiated crawler.", avatarClass: 'openai', letter: 'C' },
-  { name: 'CCBot', ua: 'CCBot', desc: "Common Crawl's open-web scraper.", avatarClass: '', letter: 'C' }
-]
+import { CRAWLER_CATALOG, CRAWLER_BY_ID, CRAWLER_BY_TOKEN } from '../../../shared/crawlers.js'
 
-// Get Severity Score Tone
-export const getScoreTone = (val) => {
-  if (val >= 80) return 'good'
-  if (val >= 55) return 'warning'
-  return 'poor'
-}
+export { CRAWLER_CATALOG, CRAWLER_BY_ID, CRAWLER_BY_TOKEN }
+export const AI_CRAWLERS = CRAWLER_CATALOG.map(crawler => ({ ...crawler, ua: crawler.token, desc: crawler.description }))
+export const getScoreTone = value => value >= 80 ? 'good' : value >= 55 ? 'warning' : 'poor'
 
-// Get status label from bots permissions
 export function getBotStatusLabel(robots, botUa) {
-  const status = robots.aiCrawlerPermissions[botUa] || robots.aiCrawlerPermissions['*'] || 'allowed'
-  if (status === 'blocked') return 'Blocked'
-  if (status === 'partially-blocked') return 'Limited'
-  return 'Allowed'
+  const status = robots.aiCrawlerPermissions?.[botUa] || robots.aiCrawlerPermissions?.['*'] || 'allowed'
+  return status === 'blocked' ? 'Blocked' : status === 'partially-blocked' ? 'Limited' : 'Allowed'
 }
 
-// Get bot rules matching raw rules
 export function getBotRulesContent(robots, botUa) {
-  const specificGroup = robots.rules.find(g => g.userAgent.toLowerCase() === botUa.toLowerCase())
-  const wildcardGroup = robots.rules.find(g => g.userAgent === '*')
-  const group = specificGroup || wildcardGroup
-  
-  if (!group || group.rules.length === 0) {
-    return `User-agent: ${botUa}\n# No specific rules defined (Inherited: Allowed)`
-  }
-  
-  let text = `User-agent: ${group.userAgent}\n`
-  group.rules.forEach(r => {
-    text += `${r.type === 'allow' ? 'Allow' : 'Disallow'}: ${r.path}\n`
-  })
-  
-  if (robots.crawlDelays[group.userAgent]) {
-    text += `Crawl-delay: ${robots.crawlDelays[group.userAgent]}\n`
-  }
-  
-  if (specificGroup) {
-    text += `# Resolved specifically for ${botUa}`
-  } else {
-    text += `# Inherited from wildcard (*) rules`
-  }
-  
-  return text
+  const specific = robots.rules?.find(group => group.userAgent.toLowerCase() === botUa.toLowerCase())
+  const wildcard = robots.rules?.find(group => group.userAgent === '*')
+  const group = specific || wildcard
+  if (!group?.rules?.length) return `User-agent: ${botUa}\n# No matching rules; access is allowed by default.`
+  return [`User-agent: ${group.userAgent}`, ...group.rules.map(rule => `${rule.type === 'allow' ? 'Allow' : 'Disallow'}: ${rule.path}`)].join('\n')
 }
 
-// Group sitemaps for sitemap tree explorer
-export function buildSitemapTree(sitemaps) {
-  const sitemapTree = []
-  const sitemapsData = sitemaps?.discovered || []
-  const indices = sitemapsData.filter(s => s.type === 'index')
-  const urlsets = sitemapsData.filter(s => s.type === 'urlset')
-  const others = sitemapsData.filter(s => s.type !== 'index' && s.type !== 'urlset')
-
-  if (indices.length > 0) {
-    indices.forEach(idx => {
-      sitemapTree.push({
-        ...idx,
-        children: urlsets
-      })
-    })
-    sitemapTree.push(...others)
-  } else {
-    sitemapTree.push(...urlsets, ...others)
-  }
-  return sitemapTree
-}
-
-// Lookup URL probed details
 export function getProbedDetails(pages, issues, locUrl) {
-  const probed = pages?.probed?.find(p => p.url === locUrl)
-  const signals = pages?.pageSignals?.find(ps => ps.url === locUrl)
-  
-  // Check if blocked by robots
-  const isBlocked = issues?.some(i => i.type === 'blocked-in-sitemap' && i.affectedUrls?.includes(locUrl))
-  
-  return {
-    status: probed?.status || 200,
-    timing: probed?.timing || 0,
-    noindex: signals?.noindex || false,
-    blocked: isBlocked,
-    error: probed?.error
-  }
+  const normalize = value => String(value || '').replace(/\/$/, '')
+  const probed = pages?.probed?.find(page => normalize(page.url) === normalize(locUrl))
+  const signals = pages?.pageSignals?.find(page => normalize(page.url) === normalize(locUrl) || normalize(page.url) === normalize(probed?.finalUrl))
+  const blocked = issues?.some(issue => issue.type === 'blocked-in-sitemap' && issue.affectedUrls?.some(url => normalize(url) === normalize(locUrl)))
+  return { status: probed?.status || null, timing: probed?.timing || 0, noindex: !!signals?.noindex, blocked, error: probed?.error, canonical: signals?.canonical, internalLinks: signals?.internalLinks || [], finalUrl: probed?.finalUrl }
 }
 
-// Construct discovery path segments tree
 export function buildDiscoveryGraph(crawlerData) {
-  if (!crawlerData) {
-    return { graphNodes: [], graphLinks: [], canvasWidth: 0, canvasHeight: 0, nodeMap: new Map() }
-  }
+  if (!crawlerData?.origin) return { graphNodes: [], graphLinks: [], canvasWidth: 760, canvasHeight: 320, nodeMap: new Map(), sampled: false }
+  const { origin, sitemaps = {}, pages = {} } = crawlerData
+  const nodes = new Map()
+  const links = new Map()
+  const addNode = node => { if (!nodes.has(node.id)) nodes.set(node.id, node); else nodes.set(node.id, { ...nodes.get(node.id), ...node }) }
+  const addLink = (source, target, type) => { if (source !== target) links.set(`${source}|${target}|${type}`, { source, target, type }) }
+  const pageId = url => `page:${normalizeUrl(url)}`
+  const siteId = `site:${origin}`
+  addNode({ id: siteId, name: new URL(origin).hostname, url: origin, type: 'site', status: 'indexable', depth: 0 })
 
-  const { url: targetUrl, origin, sitemaps, pages, issues } = crawlerData
+  const sitemapEntries = (sitemaps.discovered || []).filter(item => item.ok).slice(0, 12)
+  sitemapEntries.forEach(item => {
+    const id = `sitemap:${normalizeUrl(item.url)}`
+    addNode({ id, name: shortPath(item.url), url: item.url, type: 'sitemap', status: 'indexable', depth: 1, source: 'Sitemap discovery' })
+    addLink(siteId, id, 'sitemap')
+  })
 
-  const probedDetailsGetter = (locUrl) => getProbedDetails(pages, issues, locUrl)
+  const visibleEntries = (sitemaps.urls || []).slice(0, 50)
+  visibleEntries.forEach(entry => {
+    const id = pageId(entry.loc)
+    addNode({ id, name: shortPath(entry.loc), url: entry.loc, type: 'page', status: entry.classification || 'unverified', httpStatus: entry.httpStatus, canonical: entry.canonical, depth: 2, source: shortPath(entry.source), inSitemap: true })
+    const sourceId = `sitemap:${normalizeUrl(entry.source)}`
+    if (nodes.has(sourceId)) addLink(sourceId, id, 'sitemap')
+  })
 
-  const pathTree = {
-    name: 'Home',
-    path: '/',
-    url: origin || '/',
-    children: {},
-    type: 'homepage',
-    ...probedDetailsGetter(origin || targetUrl)
-  }
-
-  const sitemapUrlsList = sitemaps?.urls || []
-  const blockedUrlsSet = new Set(
-    issues
-      .filter(i => i.type === 'blocked-in-sitemap' || i.type === 'robots-blocks-all')
-      .flatMap(i => i.affectedUrls || [])
-  )
-
-  sitemapUrlsList.forEach(u => {
-    try {
-      const parsed = new URL(u.loc)
-      const pathname = parsed.pathname
-      if (pathname === '/' || pathname === '') return
-      
-      const segments = pathname.split('/').filter(Boolean)
-      let current = pathTree
-      
-      segments.forEach((seg, idx) => {
-        const isLast = idx === segments.length - 1
-        const nodePath = '/' + segments.slice(0, idx + 1).join('/')
-        
-        if (!current.children[seg]) {
-          current.children[seg] = {
-            name: seg,
-            path: nodePath,
-            url: isLast ? u.loc : '',
-            children: {},
-            type: isLast ? (segments.length > 1 ? 'page' : 'category') : 'category',
-            status: 200,
-            noindex: false,
-            blocked: false,
-            inSitemap: true
-          }
-        }
-        
-        if (isLast) {
-          const details = probedDetailsGetter(u.loc)
-          current.children[seg].url = u.loc
-          current.children[seg].status = details.status
-          current.children[seg].noindex = details.noindex
-          current.children[seg].blocked = details.blocked || blockedUrlsSet.has(u.loc)
-          current.children[seg].inSitemap = true
-        }
-        
-        current = current.children[seg]
-      })
-    } catch {
-      // ignore parsing errors
+  ;(pages.pageSignals || []).slice(0, 20).forEach(signal => {
+    const sourceId = pageId(signal.url)
+    const detail = getPageStatus(signal.url, crawlerData)
+    addNode({ id: sourceId, name: shortPath(signal.url), url: signal.url, type: 'page', status: detail.status, httpStatus: detail.httpStatus, canonical: signal.canonical, internalLinks: signal.internalLinks || [], depth: nodes.has(sourceId) ? nodes.get(sourceId).depth : 2, source: nodes.has(sourceId) ? nodes.get(sourceId).source : 'Page probe' })
+    ;(signal.internalLinks || []).slice(0, 12).forEach(target => {
+      const targetId = pageId(target)
+      if (!nodes.has(targetId) && nodes.size < 70) addNode({ id: targetId, name: shortPath(target), url: target, type: 'page', status: 'unverified', depth: 3, source: `Linked from ${shortPath(signal.url)}` })
+      if (nodes.has(targetId)) addLink(sourceId, targetId, 'internal-link')
+    })
+    if (signal.canonical && normalizeUrl(signal.canonical) !== normalizeUrl(signal.url)) {
+      const targetId = pageId(signal.canonical)
+      if (!nodes.has(targetId) && nodes.size < 70) addNode({ id: targetId, name: shortPath(signal.canonical), url: signal.canonical, type: 'page', status: 'unverified', depth: 3, source: 'Canonical target' })
+      if (nodes.has(targetId)) addLink(sourceId, targetId, 'canonical')
     }
   })
 
-  // Group and flatten tree nodes for the visual SVG graph
-  const maxNodeChildren = 3
-  const graphNodes = []
-  const graphLinks = []
-
-  function traverseAndFlatten(currentNode, parentNode, currentDepth) {
-    const nodeObj = {
-      id: currentNode.path,
-      name: currentNode.name,
-      path: currentNode.path,
-      type: currentNode.type,
-      url: currentNode.url,
-      status: currentNode.status,
-      noindex: currentNode.noindex,
-      blocked: currentNode.blocked,
-      inSitemap: currentNode.inSitemap || false,
-      depth: currentDepth
-    }
-    graphNodes.push(nodeObj)
-
-    if (parentNode) {
-      graphLinks.push({
-        source: parentNode.path,
-        target: currentNode.path
-      })
-    }
-
-    const childKeys = Object.keys(currentNode.children)
-    if (childKeys.length > 0) {
-      const sortedKeys = childKeys.sort((a, b) => {
-        const typeA = currentNode.children[a].type
-        const typeB = currentNode.children[b].type
-        if (typeA === 'category' && typeB !== 'category') return -1
-        if (typeA !== 'category' && typeB === 'category') return 1
-        return a.localeCompare(b)
-      })
-
-      const showKeys = sortedKeys.slice(0, maxNodeChildren)
-      const remainingCount = sortedKeys.length - maxNodeChildren
-
-      showKeys.forEach(key => {
-        traverseAndFlatten(currentNode.children[key], nodeObj, currentDepth + 1)
-      })
-
-      if (remainingCount > 0) {
-        const dummyNode = {
-          name: `+ ${remainingCount} pages`,
-          path: `${currentNode.path}/_more`,
-          url: '',
-          children: {},
-          type: 'more_indicator',
-          status: 200,
-          noindex: false,
-          blocked: false,
-          inSitemap: true
-        }
-        traverseAndFlatten(dummyNode, nodeObj, currentDepth + 1)
-      }
-    }
-  }
-
-  traverseAndFlatten(pathTree, null, 0)
-
-  const nodeMap = new Map(graphNodes.map(n => [n.path, n]))
-  let leafCount = 0
-  
-  function assignCoordinates(nodePath, depth) {
-    const node = nodeMap.get(nodePath)
-    if (!node) return
-
-    node.x = depth * 220 + 80
-
-    const children = graphLinks
-      .filter(l => l.source === nodePath)
-      .map(l => nodeMap.get(l.target))
-      .filter(Boolean)
-
-    if (children.length === 0) {
-      node.y = leafCount * 56 + 40
-      leafCount++
-    } else {
-      children.forEach(child => {
-        assignCoordinates(child.path, depth + 1)
-      })
-      const firstY = children[0].y
-      const lastY = children[children.length - 1].y
-      node.y = (firstY + lastY) / 2
-    }
-  }
-
-  if (graphNodes.length > 0) {
-    assignCoordinates(graphNodes[0].path, 0)
-  }
-
-  const canvasHeight = Math.max(320, leafCount * 56 + 30)
-  const canvasWidth = Math.max(760, (Math.max(...graphNodes.map(n => n.depth)) + 1) * 220 + 100)
-
-  return {
-    graphNodes,
-    graphLinks,
-    canvasHeight,
-    canvasWidth,
-    nodeMap
-  }
-}
-
-// Robots.txt syntax warnings
-export function getRobotsWarnings(robots, sitemaps) {
-  const rawRobotsLines = robots.raw ? robots.raw.split(/\r?\n/) : []
-  const warningsByLine = {}
-  let currentGroupAgent = ''
-
-  rawRobotsLines.forEach((line, idx) => {
-    const trimmed = line.trim()
-    if (trimmed.toLowerCase().startsWith('user-agent:')) {
-      currentGroupAgent = trimmed.slice(trimmed.indexOf(':') + 1).trim()
-    } else if (trimmed.toLowerCase().startsWith('disallow:')) {
-      const val = trimmed.slice(trimmed.indexOf(':') + 1).trim()
-      if (val === '/') {
-        if (currentGroupAgent === '*') {
-          warningsByLine[idx] = {
-            severity: 'critical',
-            message: 'Wildcard block (Disallow: /) stops ALL search engines and AI crawlers.'
-          }
-        } else if (AI_CRAWLERS.some(bot => bot.name.toLowerCase() === currentGroupAgent.toLowerCase())) {
-          warningsByLine[idx] = {
-            severity: 'critical',
-            message: `Completely blocks AI Agent: "${currentGroupAgent}" from scanning site contents.`
-          }
-        }
-      }
-    } else if (trimmed.toLowerCase().startsWith('crawl-delay:')) {
-      const val = parseFloat(trimmed.slice(trimmed.indexOf(':') + 1).trim())
-      if (val >= 10) {
-        warningsByLine[idx] = {
-          severity: 'warning',
-          message: `Crawl-delay (${val}s) is very high. It will severely slow indexing rates.`
-        }
-      }
-    } else if (trimmed.toLowerCase().startsWith('sitemap:')) {
-      const val = trimmed.slice(trimmed.indexOf(':') + 1).trim()
-      const matchedErr = sitemaps?.errors?.find(e => e.url === val)
-      if (matchedErr) {
-        warningsByLine[idx] = {
-          severity: 'critical',
-          message: `Linked Sitemap failed to parse: ${matchedErr.error}`
-        }
-      }
-    }
+  ;(pages.probed || []).forEach(probe => {
+    if (!probe.finalUrl || normalizeUrl(probe.finalUrl) === normalizeUrl(probe.url)) return
+    const sourceId = pageId(probe.url); const targetId = pageId(probe.finalUrl)
+    if (!nodes.has(sourceId) && nodes.size < 70) addNode({ id: sourceId, name: shortPath(probe.url), url: probe.url, type: 'page', status: 'redirect', depth: 2, httpStatus: probe.status })
+    if (!nodes.has(targetId) && nodes.size < 70) addNode({ id: targetId, name: shortPath(probe.finalUrl), url: probe.finalUrl, type: 'page', status: 'unverified', depth: 3 })
+    if (nodes.has(sourceId) && nodes.has(targetId)) addLink(sourceId, targetId, 'redirect')
   })
 
-  return warningsByLine
+  const graphNodes = [...nodes.values()]
+  const graphLinks = [...links.values()]
+  const depths = new Map()
+  graphNodes.forEach(node => { if (!depths.has(node.depth)) depths.set(node.depth, []); depths.get(node.depth).push(node) })
+  const maxRows = Math.max(...[...depths.values()].map(items => items.length), 1)
+  depths.forEach((items, depth) => items.sort((a, b) => a.name.localeCompare(b.name)).forEach((node, index) => { node.x = 70 + depth * 230; node.y = 36 + index * 48 + (maxRows - items.length) * 24 }))
+  const nodeMap = new Map(graphNodes.map(node => [node.id, node]))
+  graphNodes.forEach(node => { node.incoming = graphLinks.filter(link => link.target === node.id).length; node.outgoing = graphLinks.filter(link => link.source === node.id).length })
+  return { graphNodes, graphLinks, nodeMap, canvasWidth: Math.max(760, (Math.max(...graphNodes.map(node => node.depth), 0) + 1) * 230 + 170), canvasHeight: Math.max(320, maxRows * 48 + 72), sampled: (pages.totalDiscovered || 0) > (pages.sampleSize || 0) || sitemaps.responseCapped }
 }
+
+function getPageStatus(url, crawlerData) {
+  const entry = crawlerData.sitemaps?.urls?.find(item => normalizeUrl(item.loc) === normalizeUrl(url))
+  const probe = crawlerData.pages?.probed?.find(item => normalizeUrl(item.url) === normalizeUrl(url))
+  const signal = crawlerData.pages?.pageSignals?.find(item => normalizeUrl(item.url) === normalizeUrl(url))
+  if (entry?.classification) return { status: entry.classification, httpStatus: entry.httpStatus }
+  if (signal?.noindex) return { status: 'noindex', httpStatus: probe?.status }
+  if (probe?.error || probe?.status >= 400) return { status: 'error', httpStatus: probe?.status }
+  if (signal && probe?.status >= 200 && probe.status < 400) return { status: 'indexable', httpStatus: probe.status }
+  return { status: 'unverified', httpStatus: probe?.status }
+}
+
+function normalizeUrl(value) { try { const url = new URL(value); url.hash = ''; return url.href.replace(/\/$/, '') } catch { return String(value || '').replace(/\/$/, '') } }
+function shortPath(value) { try { const url = new URL(value); return `${url.pathname}${url.search}` || '/' } catch { return String(value || '') } }

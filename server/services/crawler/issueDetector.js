@@ -5,9 +5,9 @@
  * { id, type, severity, confidence, affectedUrls, evidence, recommendation, crawlerAffected, source }
  */
 
-import { AI_CRAWLERS, isPathAllowed } from './robotsParser.js'
+import { isPathAllowed } from './robotsParser.js'
 
-export function detectIssues({ robots, sitemaps, pages, origin }) {
+export function detectIssues({ robots, sitemaps, pages, origin, urlInspection }) {
   const issues = []
   const add = (issue) => issues.push(issue)
 
@@ -19,18 +19,6 @@ export function detectIssues({ robots, sitemaps, pages, origin }) {
     const wildcardGroup = robots.parsed.groups.find(g => g.userAgent === '*')
     if (wildcardGroup?.rules.some(r => r.type === 'disallow' && r.path === '/') && !wildcardGroup.rules.some(r => r.type === 'allow')) {
       add({ id: 'robots-blocks-all', type: 'robots-blocks-all', severity: 'critical', confidence: 'definite', affectedUrls: ['/'], evidence: 'User-agent: *\nDisallow: /', recommendation: 'Remove the blanket Disallow: / rule unless you intentionally want to block all crawlers.', crawlerAffected: ['all'], source: 'robots.txt' })
-    }
-
-    // Check each AI crawler
-    for (const crawler of AI_CRAWLERS) {
-      const perm = robots.parsed.aiCrawlerPermissions[crawler]
-      if (perm === 'blocked') {
-        add({ id: `ai-blocked-${crawler.toLowerCase()}`, type: 'ai-crawler-blocked', severity: 'critical', confidence: 'definite', affectedUrls: ['/'], evidence: `${crawler} is fully blocked via robots.txt.`, recommendation: `Remove the Disallow: / rule for ${crawler} if you want AI systems to access your content.`, crawlerAffected: [crawler], source: 'robots.txt' })
-      } else if (perm === 'partially-blocked') {
-        const group = robots.parsed.groups.find(g => g.userAgent.toLowerCase() === crawler.toLowerCase()) || wildcardGroup
-        const disallowPaths = group?.rules.filter(r => r.type === 'disallow').map(r => r.path) || []
-        add({ id: `ai-partial-${crawler.toLowerCase()}`, type: 'ai-crawler-partial', severity: 'warning', confidence: 'high', affectedUrls: disallowPaths, evidence: `${crawler} is partially blocked. Disallowed paths: ${disallowPaths.join(', ')}`, recommendation: `Review which paths are blocked for ${crawler} and ensure important content is accessible.`, crawlerAffected: [crawler], source: 'robots.txt' })
-      }
     }
 
     // High crawl delays
@@ -131,7 +119,8 @@ export function detectIssues({ robots, sitemaps, pages, origin }) {
     }
   }
 
-  return issues
+  const combined = [...(urlInspection?.issues || []), ...issues]
+  return [...new Map(combined.map(issue => [`${issue.type}|${(issue.affectedUrls || []).join('|')}`, issue])).values()]
 }
 
 function hash(str) {
