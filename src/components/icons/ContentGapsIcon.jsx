@@ -1,3 +1,3 @@
-import { Files } from 'lucide-react'
+import { Files } from './heroicons'
 import { createAppIcon } from './createAppIcon'
 export default createAppIcon(Files)

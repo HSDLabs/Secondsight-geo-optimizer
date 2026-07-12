@@ -1,3 +1,3 @@
-import { SlidersHorizontal } from 'lucide-react'
+import { SlidersHorizontal } from './heroicons'
 import { createAppIcon } from './createAppIcon'
 export default createAppIcon(SlidersHorizontal)

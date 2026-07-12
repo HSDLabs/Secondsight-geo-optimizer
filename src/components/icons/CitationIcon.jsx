@@ -1,3 +1,3 @@
-import { Quote } from 'lucide-react'
+import { Quote } from './heroicons'
 import { createAppIcon } from './createAppIcon'
 export default createAppIcon(Quote)

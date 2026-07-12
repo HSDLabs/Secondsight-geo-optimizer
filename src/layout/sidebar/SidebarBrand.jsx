@@ -4,12 +4,10 @@ export default function SidebarBrand({ isCollapsed }) {
       <span className="sidebar-logo-wrap">
         <img src="/logo.svg" alt="" className="sidebar-logo" />
       </span>
-      {!isCollapsed && (
-        <div className="sidebar-brand-copy">
+      <div className="sidebar-brand-copy" aria-hidden={isCollapsed}>
           <span>SecondSight</span>
           <strong>GEO Optimizer</strong>
-        </div>
-      )}
+      </div>
     </div>
   )
 }

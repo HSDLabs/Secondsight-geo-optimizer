@@ -7,9 +7,10 @@ import CrawlerHealthOverview from './CrawlerHealthOverview'
 import CrawlerPermissions from './CrawlerPermissions'
 import RobotsViewer from './RobotsViewer'
 import SitemapExplorer from './SitemapExplorer'
-import DiscoveryGraph from './DiscoveryGraph'
+import DiscoveryExplorer from './DiscoveryExplorer'
 import CrawlerIssues from './CrawlerIssues'
 import LlmsTxtAssistant from './LlmsTxtAssistant'
+import { groupCrawlerIssues } from './utils/issueGrouping'
 
 export default function CrawlerAccess() {
   const { loading: showLoading, error: parentError, crawlerData, data, externalData, reanalyze } = useOutletContext()
@@ -17,13 +18,13 @@ export default function CrawlerAccess() {
 
   // UI Interactive States
   const [expandedIssues, setExpandedIssues] = useState({})
-  const [activeGraphNode, setActiveGraphNode] = useState(null)
   const [inspectionState, setInspectionState] = useState({ analysisUrl: '', issues: [] })
 
-  const issues = useMemo(() => {
+  const issueModel = useMemo(() => {
     const combined = [...(crawlerData?.issues || []), ...(inspectionState.issues || [])]
-    return [...new Map(combined.map(issue => [issue.id, issue])).values()]
+    return groupCrawlerIssues(combined)
   }, [crawlerData?.issues, inspectionState])
+  const issues = issueModel.groupedIssues
 
   // ── Action Queue Issues (sorted by impact severity) ──
   const sortedIssues = useMemo(() => {
@@ -53,8 +54,9 @@ export default function CrawlerAccess() {
   const criticalIssuesCount = issues.filter(i => i.severity === 'critical').length
 
   const showIssue = issueId => {
-    setExpandedIssues(current => ({ ...current, [issueId]: true }))
-    requestAnimationFrame(() => [...document.querySelectorAll('[data-crawler-issue]')].find(element => element.dataset.crawlerIssue === issueId && element.offsetParent !== null)?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+    const groupId = issueModel.issueIdToGroupId.get(issueId) || issueId
+    setExpandedIssues(current => ({ ...current, [groupId]: true }))
+    requestAnimationFrame(() => [...document.querySelectorAll('[data-crawler-issue]')].find(element => element.dataset.crawlerIssue === groupId && element.offsetParent !== null)?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
   }
 
   return (
@@ -92,10 +94,11 @@ export default function CrawlerAccess() {
           <SitemapExplorer sitemaps={sitemaps} />
         </div>
 
-        <div className="mt-4 grid min-w-0 items-stretch gap-4 2xl:grid-cols-[minmax(330px,.72fr)_minmax(0,1.28fr)]">
+        <div className="mt-4 min-w-0">
           <LlmsTxtAssistant llmsTxt={crawlerData?.llmsTxt} analysisUrl={crawlerData?.url} analysisData={data} crawlerData={crawlerData} externalData={externalData} />
-          <DiscoveryGraph crawlerData={crawlerData} activeGraphNode={activeGraphNode} setActiveGraphNode={setActiveGraphNode} />
         </div>
+
+        <div className="mt-4 min-w-0"><DiscoveryExplorer crawlerData={crawlerData} /></div>
 
         {/* 6. Crawler Issues Accordion (Action Queue) */}
         <CrawlerIssues

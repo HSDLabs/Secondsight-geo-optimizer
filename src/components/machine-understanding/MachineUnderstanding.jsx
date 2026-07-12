@@ -9,7 +9,14 @@ import ImprovementOpportunities from './ImprovementOpportunities'
 import MachineSignals from './MachineSignals'
 import { buildCanonicalIssues } from './utils/progressiveAnalysis'
 import { buildInterpretationOpportunities } from './utils/analysisViewModel'
-import { analysisSkeletonClass } from '../common/analysisSkeleton'
+import { Diamond, FileText, Image, Network } from '../icons/heroicons'
+
+const pendingEvidence = [
+  { label: 'Human view', detail: 'Rendered page preview', icon: Image, tone: 'text-[var(--accent-blue)] bg-[var(--accent-blue)]/[.07]' },
+  { label: 'Accessibility tree', detail: 'Semantic relationships', icon: Network, tone: 'text-[var(--accent-teal)] bg-[var(--accent-teal)]/[.07]' },
+  { label: 'Readable content', detail: 'Extracted page copy', icon: FileText, tone: 'text-[var(--accent-purple)] bg-[var(--accent-purple)]/[.07]' },
+  { label: 'Metadata', detail: 'Identity and structured signals', icon: Diamond, tone: 'text-[var(--accent-amber)] bg-[var(--accent-amber)]/[.07]' }
+]
 
 export default function MachineUnderstanding() {
   const {
@@ -54,9 +61,9 @@ export default function MachineUnderstanding() {
 
 function LoadingWorkspace({ loading }) {
   return (
-    <section aria-live="polite" className="rounded-xl border border-sky-400/15 bg-[#111927]/60 p-5">
-      <div className="flex items-center gap-3"><span className={`${loading ? 'mu-scan-pulse bg-sky-400' : 'bg-slate-600'} size-2 rounded-full`} /><div><h2 className="text-xs font-semibold text-slate-200">{loading ? 'Building the evidence map' : 'Machine evidence workspace'}</h2><p className="mt-1 text-[11px] text-slate-500">{loading ? 'Rendering the page, extracting semantics, and preparing readable content.' : 'Analyze a URL to populate the evidence cards below.'}</p></div></div>
-      <div className="mu-stagger-grid mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{['Human view', 'Accessibility tree', 'Readable content', 'Metadata'].map(label => <div key={label} className="flex min-h-[112px] flex-col rounded-lg border border-slate-700/45 bg-[#0b121d]/70 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-slate-600/70 hover:shadow-[0_14px_35px_rgba(0,0,0,.14)]"><span className="text-[10px] font-semibold uppercase tracking-[.07em] text-slate-500">{label}</span><span className={`mt-3 block h-9 w-20 ${analysisSkeletonClass}`}/><span className="mt-auto pt-3 text-[10px] text-slate-600">{loading ? 'Analyzing signals' : 'Awaiting analysis'}</span></div>)}</div>
+    <section aria-live="polite" className="rounded-xl border border-[var(--accent-purple)]/15 bg-[var(--panel)] p-5">
+      <div className="flex items-center gap-3"><span className={`size-2 rounded-full ${loading ? 'bg-[var(--accent-purple)]' : 'bg-[var(--text-muted)]'}`} /><div><h2 className="text-[14px] font-semibold text-[var(--text)]">{loading ? 'Preparing machine evidence' : 'Machine evidence workspace'}</h2><p className="mt-1 text-[13px] text-[var(--text-secondary)]">{loading ? 'The report will populate when the rendered evidence is ready.' : 'Analyze a URL to populate the evidence cards below.'}</p></div></div>
+      <div className="mt-5 grid gap-4 sm:grid-cols-2 min-[1440px]:grid-cols-3 min-[1680px]:grid-cols-4">{pendingEvidence.map(({ label, detail, icon: Icon, tone }) => <div key={label} className="flex min-h-32 flex-col rounded-lg border border-[var(--border)] bg-[var(--panel-raised)] p-5"><span className={`grid size-10 place-items-center rounded-lg ${tone}`}><Icon size={20}/></span><strong className="mt-4 text-[13px] font-semibold text-[var(--text)]">{label}</strong><span className="mt-1 text-[12px] text-[var(--text-secondary)]">{loading ? detail : 'Available after analysis'}</span></div>)}</div>
     </section>
   )
 }

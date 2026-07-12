@@ -11,17 +11,20 @@
     "server": "nodemon server/index.js",
     "lint": "eslint .",
     "test:crawler": "node --test server/services/crawler/*.test.mjs",
+    "test:ui": "vitest run",
+    "test:ui:watch": "vitest",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@mozilla/readability": "^0.6.0",
     "@tailwindcss/vite": "^4.3.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "fast-xml-parser": "^5.9.3",
+    "impeccable": "^3.2.1",
     "jsdom": "^29.1.1",
-    "lucide-react": "^1.24.0",
     "playwright": "1.61.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
@@ -32,6 +35,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
@@ -41,6 +47,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "nodemon": "^3.1.14",
-    "vite": "^8.0.12"
+    "vite": "^8.0.12",
+    "vitest": "^4.1.10"
   }
 }

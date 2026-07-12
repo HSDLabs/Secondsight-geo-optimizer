@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { AlertTriangle, Check, ChevronDown, FlaskConical, RotateCw, ShieldAlert } from 'lucide-react'
+import { AlertTriangle, Check, ChevronDown, FlaskConical, RotateCw, ShieldAlert } from '../icons/heroicons'
 import { CRAWLER_BY_ID, CRAWLER_CATALOG } from './utils/crawlerUtils'
 import CrawlerLogo from './CrawlerLogo'
 
@@ -58,18 +58,18 @@ export default function CrawlerPermissions({ initialInspection, origin, onInspec
     <section className="grid min-w-0 items-stretch gap-4 xl:grid-cols-[minmax(0,1.72fr)_minmax(320px,.9fr)]" aria-labelledby="crawler-access-title">
       <div className="h-full min-w-0 overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--panel)]">
         <header className="border-b border-[var(--border)] px-5 py-4">
-          <p className="m-0 text-[10px] font-bold uppercase tracking-[.12em] text-[var(--accent)]">Diagnostic Layer</p>
+          <p className="m-0 text-[11px] font-bold uppercase tracking-[.14em] text-[var(--accent-blue)]">Diagnostic layer</p>
           <div className="mt-1.5 flex items-center justify-between gap-4">
             <div>
               <h2 id="crawler-access-title" className="m-0 text-base font-bold tracking-[-.02em] text-[var(--text)]">1. Crawler Permissions</h2>
               <p className="mt-1 text-xs text-[var(--muted)]">How each crawler is treated by robots.txt for the inspected URL.</p>
             </div>
-            <span className="shrink-0 rounded-full border border-sky-400/20 bg-sky-400/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.08em] text-sky-300">10 agents</span>
+            <span className="shrink-0 rounded-full border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.08em] text-blue-100">10 agents</span>
           </div>
         </header>
 
         <div className="hidden min-w-[630px] md:block">
-          <div className="grid grid-cols-[minmax(150px,1.1fr)_minmax(110px,.8fr)_70px_60px_minmax(120px,1fr)_30px] gap-2 border-b border-[var(--border)] bg-black/10 px-3 py-2.5 text-[9px] font-bold uppercase tracking-[.07em] text-[var(--faint)]">
+          <div className="grid grid-cols-[minmax(150px,1.1fr)_minmax(110px,.8fr)_70px_60px_minmax(120px,1fr)_30px] gap-2 border-b border-[var(--border)] bg-[var(--bg-darker)]/45 px-3 py-3 text-[11px] font-bold uppercase tracking-[.07em] text-[var(--text-secondary)]">
             <span>Crawler</span><span>Purpose</span><span>Access</span><span>Coverage</span><span>Rule matched</span><span className="text-right">Line</span>
           </div>
           <div className="divide-y divide-[var(--border)]">
@@ -81,7 +81,7 @@ export default function CrawlerPermissions({ initialInspection, origin, onInspec
           {CRAWLER_CATALOG.map(crawler => <PermissionCard key={crawler.id} crawler={crawler} result={tableInspection?.bots?.[crawler.id]} onShowIssue={onShowIssue} />)}
         </div>
 
-        <footer className="flex flex-wrap gap-x-5 gap-y-2 border-t border-[var(--border)] px-4 py-3 text-[10px] text-[var(--faint)]">
+        <footer className="flex flex-wrap gap-x-5 gap-y-2 border-t border-[var(--border)] px-4 py-3 text-[11px] text-[var(--text-secondary)]">
           <Legend tone="bg-emerald-400" label="Allowed" detail="URL permitted" />
           <Legend tone="bg-amber-400" label="Partial" detail="Some site paths blocked" />
           <Legend tone="bg-rose-400" label="Blocked" detail="URL denied" />
@@ -91,15 +91,15 @@ export default function CrawlerPermissions({ initialInspection, origin, onInspec
 
       <aside className="h-full min-w-0 rounded-xl border border-[var(--border)] bg-[var(--panel)] p-5" aria-labelledby="bot-inspector-title">
         <div className="flex items-center gap-2">
-          <FlaskConical size={15} className="text-sky-300" />
-          <h2 id="bot-inspector-title" className="m-0 text-xs font-bold uppercase tracking-[.08em] text-[var(--text)]">URL + Bot Inspector</h2>
+          <span className="grid size-10 place-items-center rounded-xl border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/[.07] text-blue-100"><FlaskConical size={20} /></span>
+          <h2 id="bot-inspector-title" className="m-0 text-[13px] font-bold uppercase tracking-[.08em] text-[var(--text)]">URL + Bot Inspector</h2>
         </div>
 
-        <label className="mt-5 block text-[10px] font-semibold text-[var(--muted)]" htmlFor="crawler-test-url">URL</label>
+        <label className="mt-5 block text-[11px] font-semibold text-[var(--text-secondary)]" htmlFor="crawler-test-url">URL</label>
         <input id="crawler-test-url" value={urlInput} onChange={handleUrlChange} className="mt-2 w-full rounded-md border border-[var(--border)] bg-[var(--bg-darker)] px-3 py-2.5 text-xs text-[var(--text)] outline-none transition placeholder:text-[var(--faint)] focus:border-sky-400/50 focus:ring-2 focus:ring-sky-400/10" placeholder="/products/example" />
-        {(resolved.error || requestError) && <p role="alert" className="mt-2 text-[10px] leading-4 text-rose-300">{resolved.error || requestError}</p>}
+        {(resolved.error || requestError) && <p role="alert" className="mt-2 text-[12px] leading-5 text-rose-100">{resolved.error || requestError}</p>}
 
-        <label className="mt-4 block text-[10px] font-semibold text-[var(--muted)]" htmlFor="crawler-test-bot">Bot</label>
+        <label className="mt-4 block text-[11px] font-semibold text-[var(--text-secondary)]" htmlFor="crawler-test-bot">Bot</label>
         <div className="relative mt-2 h-10">
           <span className="pointer-events-none absolute left-2 top-2 z-20"><CrawlerLogo company={selectedBot.company} size="sm" label={`${selectedBot.company} logo`} /></span>
           <select id="crawler-test-bot" value={selectedBotId} onChange={event => setSelectedBotId(event.target.value)} className="absolute inset-0 z-10 w-full cursor-pointer appearance-none rounded-md border border-[var(--border)] bg-transparent py-2.5 pl-10 pr-9 text-xs font-semibold text-[var(--text)] outline-none focus:border-sky-400/50 focus:ring-2 focus:ring-sky-400/10">
@@ -107,7 +107,7 @@ export default function CrawlerPermissions({ initialInspection, origin, onInspec
           </select>
           <ChevronDown size={14} className="pointer-events-none absolute right-3 top-2.5 text-[var(--faint)]" />
         </div>
-        <p className="mt-2 text-[10px] leading-4 text-[var(--faint)]">{selectedBot.description}</p>
+        <p className="mt-2 text-[12px] leading-5 text-[var(--text-secondary)]">{selectedBot.description}</p>
 
         <button type="button" onClick={runInspection} disabled={testing || !!currentInspection || !!resolved.error} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-md border border-blue-400/20 bg-blue-500 px-3 py-2.5 text-xs font-bold text-white transition hover:bg-blue-400 disabled:cursor-default disabled:border-[var(--border)] disabled:bg-[var(--panel-raised)] disabled:text-[var(--faint)]">
           {testing ? <><RotateCw size={13} className="animate-spin" /> Testing access…</> : currentInspection ? <><Check size={13} /> Results current</> : 'Test Access'}
@@ -116,10 +116,10 @@ export default function CrawlerPermissions({ initialInspection, origin, onInspec
         {testing ? <InspectorSkeleton /> : selectedResult ? (
           <InspectorResult crawler={selectedBot} result={selectedResult} shared={currentInspection.shared} onShowIssue={onShowIssue} />
         ) : (
-          <div className="mt-4 rounded-lg border border-dashed border-[var(--border)] px-4 py-6 text-center text-[10px] leading-4 text-[var(--faint)]">Run the test to build policy and page evidence for this URL.</div>
+          <div className="mt-4 rounded-lg border border-dashed border-[var(--border)] px-4 py-6 text-center text-[12px] leading-5 text-[var(--text-secondary)]">Run the test to build policy and page evidence for this URL.</div>
         )}
 
-        <details className="mt-4 border-t border-[var(--border)] pt-3 text-[9px] text-[var(--faint)]">
+        <details className="mt-4 border-t border-[var(--border)] pt-3 text-[11px] text-[var(--text-secondary)]">
           <summary className="cursor-pointer font-semibold text-sky-300">How to use this inspector</summary>
           <ol className="mt-2 space-y-1.5 pl-4 leading-4"><li>Select a bot to swap its precomputed robots.txt policy instantly.</li><li>Edit the relative or same-origin URL, then choose Test Access.</li><li>Read bot-specific policy separately from shared HTTP, canonical, sitemap, noindex, and content evidence.</li></ol>
           <p className="mt-2 leading-4">This is a policy inspection using a neutral fetch. It does not impersonate or verify a request from the crawler vendor.</p>
@@ -132,13 +132,13 @@ export default function CrawlerPermissions({ initialInspection, origin, onInspec
 function PermissionRow({ crawler, result, onShowIssue }) {
   const matched = formatRule(result?.matchedRule)
   return (
-    <div className="grid grid-cols-[minmax(150px,1.1fr)_minmax(110px,.8fr)_70px_60px_minmax(120px,1fr)_30px] items-center gap-2 px-3 py-3 text-[11px] transition hover:bg-white/[.015]">
-      <div className="flex min-w-0 items-center gap-2.5"><CrawlerLogo company={crawler.company} size="sm" label={`${crawler.company} logo`} /><div className="min-w-0"><strong className="block truncate font-semibold text-[var(--text)]">{crawler.name}</strong>{crawler.category === 'control' && <span className="text-[8px] uppercase tracking-wide text-amber-300">Control token</span>}</div></div>
-      <span className="truncate text-[10px] text-[var(--muted)]">{crawler.purpose}</span>
+    <div className="grid grid-cols-[minmax(150px,1.1fr)_minmax(110px,.8fr)_70px_60px_minmax(120px,1fr)_30px] items-center gap-2 px-3 py-3 text-[12px] transition hover:bg-white/[.018]">
+      <div className="flex min-w-0 items-center gap-2.5"><CrawlerLogo company={crawler.company} size="sm" label={`${crawler.company} logo`} /><div className="min-w-0"><strong className="block truncate font-semibold text-[var(--text)]">{crawler.name}</strong>{crawler.category === 'control' && <span className="text-[10px] uppercase tracking-wide text-amber-100">Control token</span>}</div></div>
+      <span className="truncate text-[11px] text-[var(--text-secondary)]">{crawler.purpose}</span>
       <StatusBadge access={result?.access} coverage={result?.coverage} />
-      <span className="text-[10px] text-[var(--muted)]">{coverageLabel[result?.coverage] || '—'}</span>
-      <button type="button" disabled={!result?.issueIds?.length} onClick={() => onShowIssue?.(result.issueIds[0])} className="flex min-w-0 items-center gap-1.5 truncate text-left font-mono text-[10px] text-[var(--muted)] disabled:cursor-default enabled:text-amber-300 enabled:hover:text-amber-200"><span className="truncate">{matched}</span>{result?.issueIds?.length > 0 && <AlertTriangle size={11} className="shrink-0" />}</button>
-      <span className="text-right font-mono text-[10px] text-[var(--faint)]">{result?.matchedRule?.line || '—'}</span>
+      <span className="text-[11px] text-[var(--text-secondary)]">{coverageLabel[result?.coverage] || '—'}</span>
+      <button type="button" disabled={!result?.issueIds?.length} onClick={() => onShowIssue?.(result.issueIds[0])} className="flex min-h-10 min-w-0 items-center gap-1.5 truncate text-left font-mono text-[11px] text-[var(--text-secondary)] disabled:cursor-default enabled:text-amber-100 enabled:hover:text-amber-50"><span className="truncate">{matched}</span>{result?.issueIds?.length > 0 && <AlertTriangle size={15} className="shrink-0" />}</button>
+      <span className="text-right font-mono text-[11px] text-[var(--text-secondary)]">{result?.matchedRule?.line || '—'}</span>
     </div>
   )
 }
@@ -156,16 +156,16 @@ function InspectorResult({ crawler, result, shared, onShowIssue }) {
     <div className="mt-4 animate-[slideDown_180ms_ease-out] motion-reduce:animate-none">
       <div className={`rounded-lg border p-3 ${accessTone[result.access] || accessTone.unknown}`}>
         <div className="flex items-center gap-2">{allowed ? <Check size={16} /> : <ShieldAlert size={16} />}<strong className="text-xs uppercase tracking-[.06em]">{verdict}</strong></div>
-        <p className="mt-1 text-[10px] opacity-80">{crawler.name} is {unknown ? 'not currently verifiable for' : allowed ? 'permitted to request' : 'blocked from'} this URL by robots.txt.</p>
+        <p className="mt-1 text-[12px] leading-5 opacity-85">{crawler.name} is {unknown ? 'not currently verifiable for' : allowed ? 'permitted to request' : 'blocked from'} this URL by robots.txt.</p>
       </div>
       <div className="mt-3 rounded-lg border border-[var(--border)] bg-black/10 p-3">
-        <h3 className="m-0 text-[9px] font-bold uppercase tracking-[.09em] text-[var(--faint)]">Bot-specific policy</h3>
-        <dl className="mt-2 grid grid-cols-[90px_minmax(0,1fr)_44px] gap-x-3 gap-y-2 text-[10px]"><dt className="text-[var(--faint)]">Matching rule</dt><dd className="m-0 truncate font-mono text-[var(--text)]">{formatRule(result.matchedRule)}</dd><dd className="m-0 text-right font-mono text-[var(--muted)]">{result.matchedRule?.line || '—'}</dd><dt className="text-[var(--faint)]">Rule source</dt><dd className="col-span-2 m-0 capitalize text-[var(--muted)]">{result.ruleSource}</dd><dt className="text-[var(--faint)]">Site coverage</dt><dd className="col-span-2 m-0 text-[var(--muted)]">{coverageLabel[result.coverage]}</dd></dl>
+        <h3 className="m-0 text-[11px] font-bold uppercase tracking-[.09em] text-[var(--text-secondary)]">Bot-specific policy</h3>
+        <dl className="mt-3 grid grid-cols-[100px_minmax(0,1fr)_44px] gap-x-3 gap-y-2 text-[12px]"><dt className="text-[var(--text-secondary)]">Matching rule</dt><dd className="m-0 truncate font-mono text-[var(--text)]">{formatRule(result.matchedRule)}</dd><dd className="m-0 text-right font-mono text-[var(--text-secondary)]">{result.matchedRule?.line || '—'}</dd><dt className="text-[var(--text-secondary)]">Rule source</dt><dd className="col-span-2 m-0 capitalize text-[var(--text-secondary)]">{result.ruleSource}</dd><dt className="text-[var(--text-secondary)]">Site coverage</dt><dd className="col-span-2 m-0 text-[var(--text-secondary)]">{coverageLabel[result.coverage]}</dd></dl>
         {result.issueIds?.length > 0 && <button type="button" onClick={() => onShowIssue?.(result.issueIds[0])} className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-semibold text-amber-300 hover:text-amber-200"><AlertTriangle size={11} /> View related issue</button>}
       </div>
       <div className="mt-3 rounded-lg border border-[var(--border)] p-3">
-        <h3 className="m-0 text-[9px] font-bold uppercase tracking-[.09em] text-[var(--faint)]">Shared URL evidence</h3>
-        <dl className="mt-2 grid grid-cols-[88px_1fr] gap-y-2 text-[10px]"><Evidence label="HTTP status" value={shared.httpStatus || 'No response'} tone={shared.httpStatus >= 200 && shared.httpStatus < 400 ? 'good' : 'bad'} /><Evidence label="In sitemap" value={shared.inSitemap ? 'Yes' : 'No'} /><Evidence label="Canonical" value={shared.canonical || 'Not declared'} truncate /><Evidence label="noindex" value={shared.noindex ? 'Yes' : 'No'} tone={shared.noindex ? 'bad' : 'good'} /><Evidence label="Rendered text" value={shared.renderedTextAvailable ? `${shared.renderedWordCount.toLocaleString()} words` : 'Unavailable'} tone={shared.renderedTextAvailable ? 'good' : 'bad'} /><Evidence label="Recommendation" value={recommendation} tone={recommendation.includes('good') ? 'good' : undefined} /></dl>
+        <h3 className="m-0 text-[11px] font-bold uppercase tracking-[.09em] text-[var(--text-secondary)]">Shared URL evidence</h3>
+        <dl className="mt-3 grid grid-cols-[100px_1fr] gap-y-2 text-[12px]"><Evidence label="HTTP status" value={shared.httpStatus || 'No response'} tone={shared.httpStatus >= 200 && shared.httpStatus < 400 ? 'good' : 'bad'} /><Evidence label="In sitemap" value={shared.inSitemap ? 'Yes' : 'No'} /><Evidence label="Canonical" value={shared.canonical || 'Not declared'} truncate /><Evidence label="noindex" value={shared.noindex ? 'Yes' : 'No'} tone={shared.noindex ? 'bad' : 'good'} /><Evidence label="Rendered text" value={shared.renderedTextAvailable ? `${shared.renderedWordCount.toLocaleString()} words` : 'Unavailable'} tone={shared.renderedTextAvailable ? 'good' : 'bad'} /><Evidence label="Recommendation" value={recommendation} tone={recommendation.includes('good') ? 'good' : undefined} /></dl>
       </div>
     </div>
   )
@@ -178,7 +178,7 @@ function Evidence({ label, value, tone, truncate }) {
 function StatusBadge({ access = 'unknown', coverage }) {
   const label = access === 'unknown' ? 'Unknown' : access === 'blocked' ? 'Blocked' : coverage === 'partial' ? 'Limited' : 'Allowed'
   const tone = access === 'blocked' ? accessTone.blocked : access === 'unknown' ? accessTone.unknown : coverage === 'partial' ? 'border-amber-400/20 bg-amber-400/10 text-amber-300' : accessTone.allowed
-  return <span className={`inline-flex w-fit rounded px-2 py-1 text-[8px] font-bold uppercase tracking-[.05em] ${tone}`}>{label}</span>
+  return <span className={`inline-flex min-h-7 w-fit items-center rounded-full border px-2.5 text-[10px] font-bold uppercase tracking-[.05em] ${tone}`}>{label}</span>
 }
 
 function Legend({ tone, label, detail }) {
@@ -186,7 +186,7 @@ function Legend({ tone, label, detail }) {
 }
 
 function InspectorSkeleton() {
-  return <div className="mt-4 grid animate-pulse gap-3"><div className="h-16 rounded-lg bg-white/[.035]" /><div className="h-28 rounded-lg bg-white/[.035]" /><div className="h-36 rounded-lg bg-white/[.035]" /></div>
+  return <div className="mt-4 grid gap-3" aria-label="Preparing URL inspection"><div className="rounded-lg border border-[var(--border)] bg-[var(--panel-raised)] p-4"><span className="text-[11px] font-semibold uppercase tracking-[.06em] text-[var(--text-secondary)]">Policy result</span><p className="mt-2 text-[12px] text-[var(--text-secondary)]">Checking the selected crawler against published rules.</p></div><div className="rounded-lg border border-[var(--border)] bg-[var(--panel-raised)] p-4"><span className="text-[11px] font-semibold uppercase tracking-[.06em] text-[var(--text-secondary)]">Page evidence</span><p className="mt-2 text-[12px] text-[var(--text-secondary)]">HTTP, sitemap, canonical, and noindex evidence will appear here.</p></div></div>
 }
 
 function formatRule(rule) {

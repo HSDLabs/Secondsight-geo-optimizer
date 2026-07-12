@@ -4,7 +4,7 @@ import {
   ArrowRight,
   Clock,
   LockKeyhole,
-} from 'lucide-react'
+} from '../icons/heroicons'
 import {
   CitationIcon,
   ContentGapsIcon,
@@ -32,7 +32,10 @@ const futurePillars = [
   { label: 'Content gaps', icon: ContentGapsIcon },
 ]
 
-const iconProps = { size: 15, strokeWidth: 1.7 }
+const panelIconProps = { size: 18, strokeWidth: 1.7 }
+const pillarIconProps = { size: 22, strokeWidth: 1.7 }
+const quickWinIconProps = { size: 20, strokeWidth: 1.7 }
+const focusIconProps = { size: 18, strokeWidth: 1.7 }
 
 function useAnimatedNumber(value) {
   const [display, setDisplay] = useState(value ?? 0)
@@ -73,7 +76,7 @@ export function PanelHeader({ icon: Icon, title, description, action }) {
   return (
     <header className="overview-panel-header">
       <div>
-        <div className="overview-panel-title"><span className="overview-section-icon"><Icon {...iconProps} /></span><h2>{title}</h2></div>
+        <div className="overview-panel-title"><span className="overview-section-icon"><Icon {...panelIconProps} /></span><h2>{title}</h2></div>
         {description && <p>{description}</p>}
       </div>
       {action}
@@ -88,9 +91,9 @@ export function LivePillars({ scores, loading = false }) {
         const Icon = pillar.icon
         const score = scores[pillar.key]
         return (
-          <NavLink key={pillar.key} to={pillar.path} className={`overview-live-pillar tone-${toneFor(score)}`}>
+          <NavLink key={pillar.key} to={pillar.path} className={`overview-live-pillar pillar-${pillar.key} tone-${toneFor(score)}`}>
             <div className="overview-live-pillar-top">
-              <span className="overview-icon-box"><Icon {...iconProps} /></span>
+              <span className="overview-icon-box"><Icon {...pillarIconProps} /></span>
               <span className={`overview-status tone-${toneFor(score)}`}>{loading ? 'Scanning' : verdictFor(score)}</span>
             </div>
             <p className="overview-kicker">{pillar.label}</p>
@@ -147,7 +150,7 @@ export function QuickWinsPanel({ wins, hasResults }) {
         <div className="overview-win-list">
           {wins.map((win, index) => (
             <NavLink key={`${win.action}-${index}`} to={win.category === 'Technical' ? '/crawler-access' : '/ai-understanding'} className="overview-win-row">
-              <span className="overview-win-icon"><FocusIcon {...iconProps} /></span>
+              <span className="overview-win-icon"><FocusIcon {...quickWinIconProps} /></span>
               <span className="overview-issue-copy"><strong>{win.action}</strong><small>{win.detail}</small></span>
               <span className="overview-win-meta"><b>{win.impact} impact</b><small>{win.effort}</small></span>
               <ArrowRight size={14} strokeWidth={1.7} />
@@ -197,10 +200,10 @@ export function FocusPanel({ weakest, issues }) {
       <PanelHeader icon={FocusIcon} title="What to focus on next" description="A short path toward the next score tier." />
       <div className="overview-focus-list">
         <NavLink to={weakest?.[0] === 'crawler' ? '/crawler-access' : '/ai-understanding'}>
-          <span className="tone-warning"><FocusIcon {...iconProps} /></span><strong>Improve {focusLabel}</strong><small>{weakest ? `Currently your lowest live pillar at ${Math.round(weakest[1])}.` : 'Establish a baseline before prioritizing work.'}</small><ArrowRight size={13} strokeWidth={1.7} />
+          <span className="tone-warning"><FocusIcon {...focusIconProps} /></span><strong>Improve {focusLabel}</strong><small>{weakest ? `Currently your lowest live pillar at ${Math.round(weakest[1])}.` : 'Establish a baseline before prioritizing work.'}</small><ArrowRight size={13} strokeWidth={1.7} />
         </NavLink>
-        <NavLink to="/ai-understanding"><span className="tone-good"><SuccessIcon {...iconProps} /></span><strong>Resolve high-impact issues</strong><small>{issues.length ? `${issues.length} prioritized issue groups are ready to review.` : 'High-impact issues will be grouped here.'}</small><ArrowRight size={13} strokeWidth={1.7} /></NavLink>
-        <NavLink to="/recommendations"><span className="tone-accent"><QuickWinIcon {...iconProps} /></span><strong>Implement quick wins</strong><small>Apply focused fixes, then scan again to verify the result.</small><ArrowRight size={13} strokeWidth={1.7} /></NavLink>
+        <NavLink to="/ai-understanding"><span className="tone-good"><SuccessIcon {...focusIconProps} /></span><strong>Resolve high-impact issues</strong><small>{issues.length ? `${issues.length} prioritized issue groups are ready to review.` : 'High-impact issues will be grouped here.'}</small><ArrowRight size={13} strokeWidth={1.7} /></NavLink>
+        <NavLink to="/recommendations"><span className="tone-accent"><QuickWinIcon {...focusIconProps} /></span><strong>Implement quick wins</strong><small>Apply focused fixes, then scan again to verify the result.</small><ArrowRight size={13} strokeWidth={1.7} /></NavLink>
       </div>
     </section>
   )

@@ -1,1 +1,0 @@
-export const analysisSkeletonClass = 'animate-[analysis-skeleton_1.35s_ease-in-out_infinite] rounded-lg bg-[linear-gradient(90deg,rgba(var(--overlay-rgb),.035),rgba(var(--overlay-rgb),.08),rgba(var(--overlay-rgb),.035))] [background-size:200%_100%] motion-reduce:animate-none'

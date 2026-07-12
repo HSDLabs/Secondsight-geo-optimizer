@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { X } from 'lucide-react'
+import { X } from '../icons/heroicons'
 
 export default function AnalysisModal({ open, onClose, title, description, children, maxWidth = 'max-w-4xl' }) {
   useEffect(() => {

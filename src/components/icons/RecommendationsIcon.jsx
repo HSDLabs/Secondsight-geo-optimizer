@@ -1,3 +1,3 @@
-import { ListChecks } from 'lucide-react'
+import { ListChecks } from './heroicons'
 import { createAppIcon } from './createAppIcon'
 export default createAppIcon(ListChecks)

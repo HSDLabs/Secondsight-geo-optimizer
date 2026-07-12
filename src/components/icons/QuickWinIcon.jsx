@@ -1,3 +1,3 @@
-import { Zap } from 'lucide-react'
+import { Zap } from './heroicons'
 import { createAppIcon } from './createAppIcon'
 export default createAppIcon(Zap)

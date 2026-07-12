@@ -14,8 +14,8 @@ export default function SidebarNavItem({ item, isCollapsed }) {
       aria-label={isCollapsed ? item.label : undefined}
     >
       <span className="sidebar-icon"><Icon /></span>
-      {!isCollapsed && <span className="sidebar-link-text">{item.label}</span>}
-      {!isCollapsed && <span className="sidebar-active-mark" aria-hidden="true" />}
+      <span className="sidebar-link-text" aria-hidden={isCollapsed}>{item.label}</span>
+      <span className="sidebar-active-mark" aria-hidden="true" />
     </NavLink>
   )
 }

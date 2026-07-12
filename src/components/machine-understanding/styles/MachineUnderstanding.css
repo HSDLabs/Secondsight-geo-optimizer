@@ -52,10 +52,6 @@
   animation: mu-tab-enter 160ms ease-out both;
 }
 
-.mu-scan-pulse {
-  animation: mu-scan-pulse 1.5s ease-out infinite;
-}
-
 .mu-score-ring {
   animation: mu-score-ring 760ms cubic-bezier(.2, .8, .2, 1) both;
 }
@@ -96,11 +92,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes mu-scan-pulse {
-  70%, 100% { box-shadow: 0 0 0 8px rgba(56, 189, 248, 0); }
-  0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, .3); }
-}
-
 @keyframes mu-score-ring {
   from { stroke-dashoffset: 239; opacity: .35; }
 }
@@ -126,7 +117,6 @@
   .mu-section-enter,
   .mu-stagger-grid > *,
   .mu-tab-panel,
-  .mu-scan-pulse,
   .mu-score-ring,
   .mu-score-number,
   .mu-tab-indicator,

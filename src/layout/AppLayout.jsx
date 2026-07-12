@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
-import { Check, ExternalLink, RefreshCw, Share2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
+import { Check, ExternalLink, RefreshCw, Share2 } from '../components/icons/heroicons'
 import './styles/Layout.css'
 import Sidebar from './Sidebar'
 import URLInput from './header/URLInput'
@@ -11,6 +11,8 @@ import URLInput from './header/URLInput'
 // context, so one analysis stays live as the user moves between sections.
 export default function AppLayout({ url, setUrl, analyze, loading, outletContext }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const mainRef = useRef(null)
+  const { pathname } = useLocation()
   const data = outletContext?.data
   const analyzedAt = outletContext?.analyzedAt
   const hasData = !!data
@@ -26,6 +28,10 @@ export default function AppLayout({ url, setUrl, analyze, loading, outletContext
     window.addEventListener('keydown', handleShortcut)
     return () => window.removeEventListener('keydown', handleShortcut)
   }, [])
+
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [pathname])
 
   const handleShare = () => {
     if (navigator.share) {
@@ -47,7 +53,7 @@ export default function AppLayout({ url, setUrl, analyze, loading, outletContext
         onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
-      <div className="app-main">
+      <div className="app-main" ref={mainRef}>
         <header className="app-topbar">
           {hasData ? (
             <div className="app-topbar-complete flex-wrap gap-2">
@@ -57,8 +63,8 @@ export default function AppLayout({ url, setUrl, analyze, loading, outletContext
                   <Check size={12} />
                   Analysis complete
                 </span>
-                <span className="hidden text-[10px] text-slate-500 xl:inline">Rendered page</span>
-                {analyzedAt && <time className="hidden text-[10px] text-slate-500 2xl:inline" dateTime={analyzedAt}>{new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(analyzedAt))}</time>}
+                <span className="hidden text-[11px] text-[var(--text-secondary)] xl:inline">Rendered page</span>
+                {analyzedAt && <time className="hidden text-[11px] text-[var(--text-secondary)] 2xl:inline" dateTime={analyzedAt}>{new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(analyzedAt))}</time>}
               </div>
               <div className="topbar-actions">
                 <a className="topbar-source-link" href={data.url || url} target="_blank" rel="noreferrer" aria-label="Open analyzed website"><ExternalLink size={14} /></a>

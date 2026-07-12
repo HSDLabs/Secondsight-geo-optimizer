@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { Globe2, Info } from 'lucide-react'
+import { Globe2, Info } from '../icons/heroicons'
 import { scoreVerdict } from './utils/analysisViewModel'
 import AnalysisModal from './AnalysisModal'
 import { UnderstandingIcon } from '../icons'
-import { analysisSkeletonClass } from '../common/analysisSkeleton'
 
 export default function MachineUnderstandingHero({ score, scoreBreakdown, loading, url }) {
   const hasScore = typeof score === 'number'
@@ -14,33 +13,32 @@ export default function MachineUnderstandingHero({ score, scoreBreakdown, loadin
 
   return (
     <>
-    <section className="mu-section-enter relative min-w-0 overflow-hidden rounded-xl border border-slate-700/50 bg-[#101824]/90 shadow-[0_18px_60px_rgba(0,0,0,.12)]" style={{ '--mu-section-delay': '0ms' }}>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_0%,rgba(56,189,248,.045),transparent_38%)]" />
+    <section className="mu-section-enter relative min-w-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--panel)]" style={{ '--mu-section-delay': '0ms' }}>
       <div className="relative grid min-w-0 lg:grid-cols-[minmax(0,1.55fr)_minmax(250px,.72fr)_minmax(260px,.78fr)]">
         <div className="flex min-h-44 min-w-0 flex-col justify-center px-5 py-6 sm:px-7">
           <div className="flex items-center gap-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-sky-400/20 bg-sky-400/[.06] text-sky-300 shadow-[inset_0_1px_rgba(255,255,255,.025)]"><UnderstandingIcon size={21} strokeWidth={1.8} /></span>
-            <h1 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-slate-100 sm:text-[1.7rem]">Machine Understanding</h1>
-            <span className="rounded border border-violet-400/25 bg-violet-400/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-violet-300">Beta</span>
+            <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-[var(--accent-purple)]/25 bg-[var(--accent-purple)]/10 text-purple-100"><UnderstandingIcon size={24} strokeWidth={1.8} /></span>
+            <h1 className="text-[1.45rem] font-semibold tracking-[-0.03em] text-[var(--text)] sm:text-[1.7rem]">Machine Understanding</h1>
+            <span className="rounded-full border border-[var(--accent-purple)]/25 bg-[var(--accent-purple)]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-purple-100">Beta</span>
           </div>
-          <p className="mt-3 text-sm leading-5 text-slate-400">Can machines reliably parse and understand this page?</p>
-          {url && <p className="mt-3 flex min-w-0 items-center gap-2 text-[11px] text-slate-500"><Globe2 size={12} className="shrink-0 text-sky-300" /><span className="truncate">{url}</span></p>}
+          <p className="mt-3 text-sm leading-5 text-[var(--text-secondary)]">Can machines reliably parse and understand this page?</p>
+          {url && <p className="mt-3 flex min-w-0 items-center gap-2 text-[12px] text-[var(--text-secondary)]"><Globe2 size={16} className="shrink-0 text-[var(--accent-purple)]" /><span className="break-all">{url}</span></p>}
         </div>
 
         <div className="min-w-0 border-t border-slate-700/40 bg-[#0b121d]/45 px-5 py-5 lg:border-l lg:border-t-0">
-          <div className="flex items-center gap-2 text-[9px] font-semibold uppercase tracking-[0.11em] text-slate-400">Machine Readability Score <Info size={11} /></div>
-          {showSkeleton ? <div className={`mt-4 h-14 w-28 ${analysisSkeletonClass}`} aria-label={loading ? 'Calculating machine readability' : 'Awaiting machine-understanding analysis'} /> : (
+          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.11em] text-[var(--text-secondary)]">Machine Readability Score <Info size={15} /></div>
+          {showSkeleton ? <PendingScore label={loading ? 'Calculating' : 'Not analyzed'} ariaLabel={loading ? 'Calculating machine readability' : 'Awaiting machine-understanding analysis'} /> : (
             <>
               <div className="mt-2 flex items-end justify-center gap-2 lg:justify-start"><strong className="mu-score-number text-5xl font-semibold tabular-nums tracking-[-0.05em] text-emerald-300">{safeScore}</strong><span className="mb-1.5 text-sm text-slate-500">/ 100</span></div>
               <Status label={verdict.label} tone={verdict.tone} />
             </>
           )}
-          {!showSkeleton && scoreBreakdown?.items?.length > 0 && <button type="button" onClick={() => setShowDetails(true)} className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-medium text-sky-300 transition hover:text-sky-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400">View score details <span aria-hidden="true">→</span></button>}
+          {!showSkeleton && scoreBreakdown?.items?.length > 0 && <button type="button" onClick={() => setShowDetails(true)} className="mt-3 inline-flex min-h-10 items-center gap-2 text-[12px] font-semibold text-[var(--accent-blue)] transition hover:text-blue-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent-blue)]">View score details <span aria-hidden="true">→</span></button>}
         </div>
 
         <div className="flex min-w-0 flex-col justify-center border-t border-slate-700/40 px-5 py-5 lg:border-l lg:border-t-0 sm:px-6">
-          <p className="text-xs leading-5 text-slate-400">Measures how well machines can parse structure, readable content, metadata, and accessible semantics.</p>
-          <p className="mt-3 flex items-center gap-2 text-[11px] text-slate-500"><Info size={12} className="shrink-0" />Does not measure AI rankings.</p>
+          <p className="text-[13px] leading-5 text-[var(--text-secondary)]">Measures how well machines can parse structure, readable content, metadata, and accessible semantics.</p>
+          <p className="mt-3 flex items-center gap-2 text-[12px] text-[var(--text-secondary)]"><Info size={15} className="shrink-0" />Does not measure AI rankings.</p>
         </div>
       </div>
     </section>
@@ -49,8 +47,12 @@ export default function MachineUnderstandingHero({ score, scoreBreakdown, loadin
   )
 }
 
+function PendingScore({ label, ariaLabel }) {
+  return <div className="mt-4 inline-flex min-h-14 min-w-32 items-center gap-3 rounded-lg border border-[var(--accent-purple)]/15 bg-[var(--accent-purple)]/[.045] px-4" aria-label={ariaLabel}><strong className="text-3xl font-semibold text-[var(--text-secondary)]">—</strong><span className="text-[11px] font-semibold uppercase tracking-[.06em] text-[var(--text-secondary)]">{label}</span></div>
+}
+
 function Status({ label, tone }) {
-  return <span className={`mt-2 inline-flex min-w-32 justify-center rounded-md border px-3 py-1 text-[10px] font-medium ${tone}`}>{label}</span>
+  return <span className={`mt-2 inline-flex min-h-8 min-w-32 items-center justify-center rounded-full border px-3 text-[10px] font-medium ${tone}`}>{label}</span>
 }
 
 function ScoreDetailsModal({ open, onClose, score, verdict, scoreBreakdown }) {
@@ -71,7 +73,7 @@ function ScoreDetailsModal({ open, onClose, score, verdict, scoreBreakdown }) {
           })}</dl>
         </div>
       </div>
-      <div className="mt-4 rounded-lg border border-sky-400/10 bg-sky-400/[.035] p-4"><h3 className="text-[10px] font-semibold text-slate-300">What this score means</h3><p className="mt-2 text-[11px] leading-5 text-slate-500">The score measures how clearly the rendered page exposes structure, accessible semantics, readable content, and extractable signals. It does not measure search position, model preference, or AI rankings.</p></div>
+      <div className="mt-4 rounded-lg border border-[var(--accent-purple)]/15 bg-[var(--accent-purple)]/[.055] p-4"><h3 className="text-[12px] font-semibold text-[#f5f1ff]">What this score means</h3><p className="mt-2 text-[12px] leading-5 text-[#d8d1e7]">The score measures how clearly the rendered page exposes structure, accessible semantics, readable content, and extractable signals. It does not measure search position, model preference, or AI rankings.</p></div>
     </AnalysisModal>
   )
 }

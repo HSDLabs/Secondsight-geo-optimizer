@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { ArrowRight, Globe2, Info } from 'lucide-react'
+import { ArrowRight, Globe2, Info } from '../icons/heroicons'
 import { AI_CRAWLERS, getScoreTone } from './utils/crawlerUtils'
 import { CrawlerIcon } from '../icons'
-import { analysisSkeletonClass } from '../common/analysisSkeleton'
 
 const numberFormatter = new Intl.NumberFormat()
 const scoreToneClass = {
@@ -85,18 +84,18 @@ export default function CrawlerHealthOverview({
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_0%,rgba(56,189,248,.045),transparent_38%)]" />
         <div className="relative flex min-h-44 min-w-0 flex-col justify-center px-5 py-5 sm:px-7">
           <div className="flex items-center gap-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-lg border border-sky-400/20 bg-sky-400/[.06] text-sky-300 shadow-[inset_0_1px_rgba(255,255,255,.025)]"><CrawlerIcon size={21} strokeWidth={1.8}/></span>
+            <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 text-blue-100"><CrawlerIcon size={24} strokeWidth={1.8}/></span>
             <h1 className="m-0 text-[1.45rem] font-semibold tracking-[-.03em] text-slate-100 sm:text-[1.65rem]">Crawler Access</h1>
-            <span className="rounded border border-violet-400/25 bg-violet-400/10 px-2 py-1 text-[9px] font-semibold uppercase tracking-[.12em] text-violet-300">Beta</span>
+            <span className="rounded-full border border-[var(--accent-purple)]/25 bg-[var(--accent-purple)]/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.12em] text-purple-100">Beta</span>
           </div>
           <p className="mt-3 max-w-xl text-sm leading-5 text-slate-400">Can search engines, AI crawlers, and retrieval systems reliably discover this site?</p>
-          {url && <p className="mt-3 flex min-w-0 items-center gap-2 text-[11px] text-slate-500"><Globe2 size={12} className="shrink-0 text-sky-300"/><span className="truncate">{url}</span></p>}
+          {url && <p className="mt-3 flex min-w-0 items-center gap-2 text-[12px] text-[var(--text-secondary)]"><Globe2 size={16} className="shrink-0 text-[var(--accent-blue)]"/><span className="break-all">{url}</span></p>}
         </div>
 
         <div className="relative flex min-w-0 flex-col items-start justify-center border-t border-slate-700/40 bg-[#0b121d]/45 px-5 py-5 text-left lg:border-l lg:border-t-0">
-          <span className="inline-flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[.11em] text-slate-400">Crawler Access Score <Info size={11} aria-hidden="true" /></span>
+          <span className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[.11em] text-[var(--text-secondary)]">Crawler Access Score <Info size={15} aria-hidden="true" /></span>
           {showSkeleton ? (
-            <div className={`mt-4 h-14 w-28 ${analysisSkeletonClass}`} aria-label="Awaiting crawler analysis" />
+            <PendingCrawlerScore loading={loading} />
           ) : (
             <>
               <div className="mt-2 flex items-end gap-2">
@@ -104,10 +103,10 @@ export default function CrawlerHealthOverview({
                 <span className="mb-1 text-sm text-slate-500">/ 100</span>
               </div>
               <div className="mt-2.5 flex flex-nowrap items-center gap-2">
-                <span className={`inline-flex min-w-24 justify-start rounded-md border px-3 py-1 text-[10px] font-medium ${verdictToneClass[scoreTone]}`}>{getScoreVerdict(score)}</span>
-                <button type="button" className="group inline-flex whitespace-nowrap items-center gap-1 text-[10px] font-medium text-sky-300 transition hover:text-sky-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400" aria-expanded={showBreakdown} aria-controls="crawler-score-breakdown" onClick={() => setShowBreakdown(current => !current)}>
+                <span className={`inline-flex min-h-8 min-w-24 items-center justify-start rounded-full border px-3 text-[10px] font-medium ${verdictToneClass[scoreTone]}`}>{getScoreVerdict(score)}</span>
+                <button type="button" className="group inline-flex min-h-10 whitespace-nowrap items-center gap-2 text-[12px] font-semibold text-[var(--accent-blue)] transition hover:text-blue-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent-blue)]" aria-expanded={showBreakdown} aria-controls="crawler-score-breakdown" onClick={() => setShowBreakdown(current => !current)}>
                   {showBreakdown ? 'Hide score details' : 'View score details'}
-                  <ArrowRight size={11} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5"/>
+                  <ArrowRight size={16} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5"/>
                 </button>
               </div>
             </>
@@ -116,7 +115,7 @@ export default function CrawlerHealthOverview({
 
         <div className="relative flex min-w-0 flex-col justify-center border-t border-slate-700/40 px-5 py-5 sm:px-6 lg:border-l lg:border-t-0">
           <p className="m-0 text-xs leading-5 text-slate-400">Measures published crawler policy, sitemap discovery, HTTP availability, and access to important pages.</p>
-          <p className="mt-3 flex items-start gap-2 text-[11px] leading-4 text-slate-500"><Info size={12} className="mt-0.5 shrink-0"/>Policy-based score; it does not impersonate crawler-vendor requests.</p>
+          <p className="mt-3 flex items-start gap-2 text-[12px] leading-5 text-[var(--text-secondary)]"><Info size={15} className="mt-0.5 shrink-0"/>Policy-based score; it does not impersonate crawler-vendor requests.</p>
         </div>
       </div>
 
@@ -140,14 +139,18 @@ export default function CrawlerHealthOverview({
       <div className="mu-stagger-grid grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {metrics.map(metric => (
           <article className="flex min-h-[112px] min-w-0 flex-col justify-between overflow-hidden rounded-lg border border-slate-700/45 bg-[#0b121d]/70 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-slate-600/70 hover:shadow-[0_14px_35px_rgba(0,0,0,.14)]" key={metric.label}>
-            <span className="text-[10px] font-semibold uppercase tracking-[.07em] text-slate-400">{metric.label}</span>
-            <div className={showSkeleton ? `my-2.5 h-9 w-[72px] ${analysisSkeletonClass}` : `my-2.5 min-h-9 text-[1.9rem] font-bold leading-[1.1] ${metricToneClass[metric.tone]}`}>
-              {!showSkeleton && <>{metric.value}{metric.suffix && <span className="ml-1.5 text-sm font-semibold text-[var(--faint)]">{metric.suffix}</span>}</>}
+            <span className="text-[11px] font-semibold uppercase tracking-[.07em] text-[var(--text-secondary)]">{metric.label}</span>
+            <div className={showSkeleton ? 'my-2.5 min-h-9 text-[1.9rem] font-semibold leading-[1.1] text-[var(--text-muted)]' : `my-2.5 min-h-9 text-[1.9rem] font-bold leading-[1.1] ${metricToneClass[metric.tone]}`}>
+              {showSkeleton ? '—' : <>{metric.value}{metric.suffix && <span className="ml-1.5 text-sm font-semibold text-[var(--faint)]">{metric.suffix}</span>}</>}
             </div>
-            <span className="text-[10px] leading-4 text-slate-500">{showSkeleton ? 'Awaiting analysis' : metric.detail}</span>
+            <span className="text-[12px] leading-5 text-[var(--text-secondary)]">{showSkeleton ? 'Awaiting analysis' : metric.detail}</span>
           </article>
         ))}
       </div>
     </section>
   )
+}
+
+function PendingCrawlerScore({ loading }) {
+  return <div className="mt-4 inline-flex min-h-14 min-w-32 items-center gap-3 rounded-lg border border-[var(--accent-blue)]/15 bg-[var(--accent-blue)]/[.045] px-4" aria-label="Awaiting crawler analysis"><strong className="text-3xl font-semibold text-[var(--text-secondary)]">—</strong><span className="text-[11px] font-semibold uppercase tracking-[.06em] text-[var(--text-secondary)]">{loading ? 'Checking access' : 'Not analyzed'}</span></div>
 }

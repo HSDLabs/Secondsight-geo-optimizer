@@ -1,13 +1,13 @@
 export default function SectionShell({ number, title, description, action, children, id }) {
   const delay = number ? `${Number(number) * 70}ms` : '0ms'
   return (
-    <section id={id} className="mu-section-enter min-w-0 rounded-xl border border-slate-700/50 bg-[#111927]/80 shadow-[0_18px_60px_rgba(0,0,0,0.12)]" style={{ '--mu-section-delay': delay }}>
-      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-700/30 bg-white/[.008] px-4 py-4 sm:px-5">
-        <div className="flex items-start gap-3">
-          {number && <span className="grid size-6 shrink-0 place-items-center rounded-md border border-slate-700/50 bg-slate-900/50 text-[9px] font-semibold text-slate-500">{number}</span>}
+    <section id={id} className="mu-section-enter min-w-0 rounded-2xl border border-[var(--border)] bg-[var(--panel)]" style={{ '--mu-section-delay': delay }}>
+      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--border)] px-6 py-5">
+        <div className="flex items-start gap-4">
+          {number && <span className="grid size-9 shrink-0 place-items-center rounded-lg border border-[var(--accent-purple)]/20 bg-[var(--accent-purple)]/[.07] text-[11px] font-semibold text-purple-100">{number}</span>}
           <div>
-          <h2 className="text-[12px] font-semibold uppercase tracking-[0.12em] text-slate-200">{title}</h2>
-          {description && <p className="mt-1.5 text-[11px] leading-4 text-slate-500">{description}</p>}
+          <h2 className="text-base font-semibold text-[var(--text)]">{title}</h2>
+          {description && <p className="mt-1 text-[13px] leading-5 text-[var(--text-secondary)]">{description}</p>}
           </div>
         </div>
         {action}
