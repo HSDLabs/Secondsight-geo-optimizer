@@ -42,6 +42,7 @@ export function buildEntityProfile(url, hint = {}, override = null) {
   const hintedName = sanitizeText(override?.name || hint.name || hint.title || domainStem, 120)
     .replace(/\s+[|–—-].*$/, '')
   const name = hintedName || domainStem
+  const searchTerm = sanitizeText(override?.name || hint.name || domainStem, 100) || name
   const description = sanitizeText(hint.description || hint.excerpt || '', 500)
   const aliases = unique([name, domainStem, ...(hint.aliases || [])]).map(value => sanitizeText(value, 100)).filter(Boolean)
   const categoryTerms = tokens([hint.category, hint.industry, description, ...(hint.schemaTypes || [])].join(' ')).slice(0, 20)
@@ -53,6 +54,7 @@ export function buildEntityProfile(url, hint = {}, override = null) {
     description,
     entityType: sanitizeText(hint.entityType || hint.schemaTypes?.[0] || 'Organization', 80),
     primaryCategory: sanitizeText(hint.category || hint.industry || 'Not determined', 100),
+    searchTerm,
     confidence: override ? 100 : description ? 88 : 65,
     aliases,
     categoryTerms,

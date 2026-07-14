@@ -34,7 +34,7 @@ describe('Crawl & Indexability empty state', () => {
     expect(screen.getByText('Robots.txt policy')).toBeInTheDocument()
     expect(screen.getByText('Sitemap inventory')).toBeInTheDocument()
     expect(screen.getByText('Discovery paths')).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: '1. Crawler Permissions' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Crawler Permissions' })).not.toBeInTheDocument()
   })
 
   it('uses honest progress language while the first analysis is running', () => {

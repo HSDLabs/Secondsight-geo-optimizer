@@ -28,7 +28,7 @@ export default function RawEvidenceSection({ data, selectedNodeId, onSelectNode 
 
   return (
     <>
-      <SectionShell id="raw-evidence" number="1" title="Raw Evidence" description="The machine-readable signals found on this page.">
+      <SectionShell id="raw-evidence" icon={Image} title="Raw Evidence" description="The machine-readable signals found on this page.">
         <div className="mu-stagger-grid grid items-stretch gap-4 p-5 sm:grid-cols-2 xl:grid-cols-4">
           <article className={`${cardClass} border-[var(--border)] bg-[var(--panel)]`}>
             <CardTitle icon={Image}>Human View</CardTitle>

@@ -51,7 +51,7 @@ function createAdapter(sourceType) {
       const range = rangeDays === null && requestedRange
         ? requestedRange
         : requestedRangeFor({ dateMode: 'automatic' }, rangeDays || 30)
-      const query = entity.name
+      const query = entity.searchTerm || entity.name
       if (sourceType === 'reddit') {
         const response = await withTimeout(() => client.reddit.search.posts({
           query,

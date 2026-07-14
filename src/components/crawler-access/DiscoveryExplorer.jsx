@@ -42,7 +42,7 @@ export default function DiscoveryExplorer({ crawlerData }) {
   return (
     <section className="min-w-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--panel)]" aria-labelledby="discovery-explorer-title">
       <header className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--border)] px-6 py-5">
-        <div className="min-w-0"><p className="m-0 text-[11px] font-bold uppercase tracking-[.14em] text-[var(--accent-blue)]">Discovery audit</p><h2 id="discovery-explorer-title" className="mt-2 text-base font-bold tracking-[-.01em] text-[var(--text)]">5. Discovery Explorer</h2><p className="mt-1 max-w-3xl text-[13px] leading-5 text-[var(--text-secondary)]">Find pages crawlers may miss, then see whether each page is supported by a sitemap, inspected internal links, and indexable access.</p></div>
+        <div className="min-w-0"><p className="m-0 text-[11px] font-bold uppercase tracking-[.14em] text-[var(--accent-blue)]">Discovery audit</p><h2 id="discovery-explorer-title" className="mt-2 text-base font-bold tracking-[-.01em] text-[var(--text)]">Discovery Explorer</h2><p className="mt-1 max-w-3xl text-[13px] leading-5 text-[var(--text-secondary)]">Find pages crawlers may miss, then see whether each page is supported by a sitemap, inspected internal links, and indexable access.</p></div>
         <SamplingBadge sampling={model.sampling} />
       </header>
 

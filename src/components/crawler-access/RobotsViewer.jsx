@@ -15,7 +15,7 @@ export default function RobotsViewer({ robots, sitemaps, origin, onShowIssue }) 
   return (
     <section className="min-w-0 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--panel)]" aria-labelledby="robots-viewer-title">
       <header className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--border)] px-5 py-4">
-        <div><p className="m-0 text-[11px] font-bold uppercase tracking-[.14em] text-[var(--accent-blue)]">Policy source</p><h2 id="robots-viewer-title" className="mt-2 text-base font-bold text-[var(--text)]">2. Robots.txt Analyzer</h2><p className="mt-1 text-[13px] text-[var(--text-secondary)]">See crawler rules, their scope, and source-line problems without reading raw policy unaided.</p></div>
+        <div><p className="m-0 text-[11px] font-bold uppercase tracking-[.14em] text-[var(--accent-blue)]">Policy source</p><h2 id="robots-viewer-title" className="mt-2 text-base font-bold text-[var(--text)]">Robots.txt Analyzer</h2><p className="mt-1 text-[13px] text-[var(--text-secondary)]">See crawler rules, their scope, and source-line problems without reading raw policy unaided.</p></div>
         {robots?.found && <a href={robots.url} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center gap-2 text-[12px] font-semibold text-[var(--accent-blue)] hover:text-blue-200">View full robots.txt <ExternalLink size={15} /></a>}
       </header>
 

@@ -17,7 +17,7 @@ export default function ExtractionInspector({ data, progressState }) {
   }
 
   return (
-    <SectionShell id="extraction-inspector" number="3" title="Extraction Inspector" description="The actual content and machine-readable data produced by this scan.">
+    <SectionShell id="extraction-inspector" icon={ScanLine} title="Extraction Inspector" description="The actual content and machine-readable data produced by this scan.">
       <div className="p-5">
         <div className="flex gap-1 overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--bg-darker)] p-1" role="tablist" aria-label="Extraction formats">
           {tabs.map(tab => <button key={tab.id} id={`tab-${tab.id}`} type="button" role="tab" aria-selected={activeId === tab.id} aria-controls={`panel-${tab.id}`} onClick={() => setActiveId(tab.id)} className={`relative min-h-10 whitespace-nowrap rounded-lg px-3 text-[12px] font-medium transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent-purple)] ${activeId === tab.id ? 'bg-[var(--accent-purple)]/10 text-[var(--status-purple)] shadow-[inset_0_0_0_1px_rgba(155,109,255,.2)]' : 'text-[var(--text-secondary)] hover:bg-[var(--panel-raised)] hover:text-[var(--text)]'}`}>{tab.label}{activeId === tab.id && <span className="mu-tab-indicator absolute inset-x-3 -bottom-1 h-px bg-[var(--accent-purple)]" />}</button>)}

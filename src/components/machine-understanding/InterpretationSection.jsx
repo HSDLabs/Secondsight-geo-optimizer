@@ -15,7 +15,7 @@ export default function InterpretationSection({ data, progressState, issues = []
   const action = <button type="button" onClick={() => document.getElementById('extraction-inspector')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="inline-flex min-h-10 items-center gap-2 text-[12px] font-semibold text-[var(--accent-blue)] transition hover:text-blue-200">View details <span aria-hidden="true">→</span></button>
 
   return (
-    <SectionShell number="2" title="Interpretation" description="What these signals indicate about the page." action={action}>
+    <SectionShell icon={Network} title="Interpretation" description="What these signals indicate about the page." action={action}>
       <div className="mu-stagger-grid grid items-stretch gap-4 p-5 md:grid-cols-2 min-[1440px]:grid-cols-3">
         {cards.map(card => <InterpretationCard key={card.id} card={card} issues={issues.filter(issue => issue.stageId === card.id)} />)}
       </div>
