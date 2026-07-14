@@ -43,7 +43,7 @@ describe('llms.txt Assistant', () => {
     render(<LlmsTxtAssistant llmsTxt={{ found: false, validation }} analysisUrl="https://example.test" />)
     await user.click(screen.getByRole('button', { name: 'Generate draft' }))
     expect(screen.getByRole('button', { name: 'Analyzing file…' })).toBeDisabled()
-    expect(screen.getByRole('region', { name: '4. llms.txt Assistant' })).toHaveAttribute('aria-busy', 'true')
+    expect(screen.getByRole('region', { name: 'llms.txt Assistant' })).toHaveAttribute('aria-busy', 'true')
     resolveRequest({ ok: true, json: async () => ({ suggestedContent: '# Ready', strengths: [], gaps: [], recommendations: [] }) })
     expect(await screen.findByText('# Ready')).toBeInTheDocument()
   })

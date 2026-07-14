@@ -113,8 +113,8 @@ export default function CrawlerHealthOverview({
         </div>
 
         <div className="relative flex min-w-0 flex-col justify-center border-t border-[var(--border)] px-5 py-5 sm:px-6 lg:border-l lg:border-t-0">
-          <p className="m-0 text-xs leading-5 text-[var(--text-secondary)]">Measures published crawler policy, sitemap discovery, HTTP availability, and access to important pages.</p>
-          <p className="mt-3 flex items-start gap-2 text-[12px] leading-5 text-[var(--text-secondary)]"><Info size={15} className="mt-0.5 shrink-0"/>Policy-based score; it does not impersonate crawler-vendor requests.</p>
+          <p className="m-0 text-xs leading-5 text-[var(--text-secondary)]">Measures published crawler policies, sitemap discovery, HTTP availability, and access to important pages.</p>
+          <p className="mt-3 flex items-start gap-2 text-[12px] leading-5 text-[var(--text-secondary)]"><Info size={15} className="mt-0.5 shrink-0"/>This is a policy-based assessment and does not impersonate crawler-vendor requests.</p>
         </div>
       </div>
 

@@ -34,6 +34,15 @@ test('relevance uses positive context and excludes ambiguous meanings', () => {
   assert.match(wrong.relevanceReason, /Excluded ambiguous context/)
 })
 
+test('source searches use the canonical domain term when the page title is marketing copy', () => {
+  const notion = buildEntityProfile('https://www.notion.so', {
+    title: 'The AI workspace that works for you',
+    description: 'Write, plan, and organize work in one connected workspace.'
+  })
+  assert.equal(notion.name, 'The AI workspace that works for you')
+  assert.equal(notion.searchTerm, 'notion')
+})
+
 test('normalized evidence retains provenance and safe source fields', () => {
   const item = evidence('reddit', 'abc', 'Discord community update', 'https://reddit.com/r/discordapp/comments/abc', { subreddit: 'discordapp', score: 42, num_comments: 8 })
   assert.equal(item.sourceType, 'reddit')

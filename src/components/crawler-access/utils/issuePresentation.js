@@ -21,7 +21,7 @@ const TITLES = {
   'ai-crawler-blocked': 'Crawler access is fully blocked',
   'ai-crawler-partial': 'Crawler access is limited',
   'rendered-text-unavailable': 'No readable rendered content was found',
-  'llms-txt-missing': 'Missing llms.txt',
+  'llms-txt-missing': 'llms.txt not detected',
   'llms-txt-needs-improvement': 'llms.txt needs improvement'
 }
 

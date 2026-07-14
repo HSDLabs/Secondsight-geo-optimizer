@@ -30,7 +30,7 @@ export default function ImprovementOpportunities({ issues, semanticIndex }) {
   }
 
   return (
-    <SectionShell number="4" title="Improvement Opportunities" description="Prioritized changes that can make the page easier for machines to understand.">
+    <SectionShell icon={Lightbulb} title="Improvement Opportunities" description="Prioritized changes that can make the page easier for machines to understand.">
       {issues.length === 0 ? (
         <div className="p-5"><div className="rounded-xl border border-[var(--accent-teal)]/15 bg-[var(--accent-teal)]/[.055] px-5 py-9 text-center"><strong className="text-sm font-semibold text-[var(--status-good)]">No machine-understanding blockers detected</strong><p className="mt-2 text-[13px] text-[var(--text-secondary)]">Continue monitoring after structural or content changes.</p></div></div>
       ) : (
