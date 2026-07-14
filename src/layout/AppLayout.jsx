@@ -9,13 +9,22 @@ import URLInput from './header/URLInput'
 // with the active section rendered in the Outlet. It owns no state — the
 // analysis state is passed down from App and forwarded to pages via Outlet
 // context, so one analysis stays live as the user moves between sections.
-export default function AppLayout({ url, setUrl, analyze, loading, outletContext }) {
+export default function AppLayout({ url, setUrl, analyze, loading, outletContext, apiControls }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const mainRef = useRef(null)
   const { pathname } = useLocation()
   const data = outletContext?.data
   const analyzedAt = outletContext?.analyzedAt
   const hasData = !!data
+  const externalStatus = outletContext?.externalRun?.status
+  const externalActive = externalStatus && !['completed', 'completed_degraded', 'failed', 'superseded'].includes(externalStatus)
+  const statusLabel = loading && hasData
+    ? 'Preparing sources'
+    : externalActive
+    ? 'Sources analyzing'
+    : externalStatus === 'completed_degraded'
+      ? 'Complete with limitations'
+      : 'Analysis complete'
 
   useEffect(() => {
     const handleShortcut = event => {
@@ -51,6 +60,7 @@ export default function AppLayout({ url, setUrl, analyze, loading, outletContext
       <Sidebar
         isCollapsed={isSidebarCollapsed}
         onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        apiControls={apiControls}
       />
 
       <div className="app-main" ref={mainRef}>
@@ -61,7 +71,7 @@ export default function AppLayout({ url, setUrl, analyze, loading, outletContext
                 <span className="topbar-url max-w-[190px] truncate sm:max-w-none"><span className="topbar-url-mark" />{data.url || url}</span>
                 <span className="topbar-badge">
                   <Check size={12} />
-                  Analysis complete
+                  {statusLabel}
                 </span>
                 <span className="hidden text-[11px] text-[var(--text-secondary)] xl:inline">Rendered page</span>
                 {analyzedAt && <time className="hidden text-[11px] text-[var(--text-secondary)] 2xl:inline" dateTime={analyzedAt}>{new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(analyzedAt))}</time>}

@@ -61,7 +61,7 @@ export default function LlmsTxtAssistant({ llmsTxt, analysisUrl, analysisData, c
     <section className="min-w-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--panel)]" aria-labelledby="llms-title" aria-busy={loading}>
       <header className="flex flex-col gap-5 border-b border-[var(--border)] px-6 py-5 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex min-w-0 items-start gap-4">
-          <span className={`grid size-12 shrink-0 place-items-center rounded-xl border ${state === 'missing' ? 'border-[var(--accent-amber)]/25 bg-[var(--accent-amber)]/10 text-amber-100' : 'border-[var(--accent-teal)]/25 bg-[var(--accent-teal)]/10 text-emerald-100'}`}>{state === 'missing' ? <Bot size={24}/> : <FileText size={24}/>}</span>
+          <span className={`grid size-12 shrink-0 place-items-center rounded-xl border ${state === 'missing' ? 'border-[var(--accent-amber)]/25 bg-[var(--accent-amber)]/10 text-[var(--status-warning)]' : 'border-[var(--accent-teal)]/25 bg-[var(--accent-teal)]/10 text-[var(--status-good)]'}`}>{state === 'missing' ? <Bot size={24}/> : <FileText size={24}/>}</span>
           <div className="min-w-0"><p className="m-0 text-[11px] font-bold uppercase tracking-[.14em] text-[var(--accent-purple)]">Emerging convention</p><div className="mt-1 flex flex-wrap items-center gap-3"><h2 id="llms-title" className="text-base font-bold tracking-[-.01em] text-[var(--text)]">4. llms.txt Assistant</h2><StateBadge state={state}/></div><h3 className="mt-3 text-[15px] font-semibold text-[var(--text)]">{title}</h3><p className="mt-1 max-w-3xl text-[13px] leading-5 text-[var(--text-secondary)]">{description}</p></div>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-3 xl:justify-end">
@@ -88,14 +88,14 @@ export default function LlmsTxtAssistant({ llmsTxt, analysisUrl, analysisData, c
 }
 function AuditScore({ validation }) {
   const score = Number(validation?.score || 0)
-  const tone = score >= 75 ? 'text-emerald-100' : score >= 50 ? 'text-amber-100' : 'text-rose-100'
+  const tone = score >= 75 ? 'text-[var(--status-good)]' : score >= 50 ? 'text-[var(--status-warning)]' : 'text-[var(--status-danger)]'
   const line = score >= 75 ? 'bg-[var(--accent-teal)]' : score >= 50 ? 'bg-[var(--accent-amber)]' : 'bg-[var(--accent-red)]'
   return <div className="w-40 rounded-xl border border-[var(--border)] bg-[var(--bg-darker)]/55 px-3 py-2"><div className="flex items-baseline justify-between gap-3"><span className="text-[11px] font-semibold text-[var(--text-secondary)]">Audit score</span><strong className={`text-base tabular-nums ${tone}`}>{score}/100</strong></div><div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/[.06]"><span className={`block h-full rounded-full ${line}`} style={{ width: `${Math.max(0, Math.min(100, score))}%` }}/></div></div>
 }
 
 function StateBadge({ state }) {
   const label = state === 'generated' ? 'Proposal ready' : state === 'published' ? 'Published' : 'Missing'
-  const tone = state === 'missing' ? 'border-[var(--accent-amber)]/25 bg-[var(--accent-amber)]/10 text-amber-100' : 'border-[var(--accent-teal)]/20 bg-[var(--accent-teal)]/8 text-emerald-100'
+  const tone = state === 'missing' ? 'border-[var(--accent-amber)]/25 bg-[var(--accent-amber)]/10 text-[var(--status-warning)]' : 'border-[var(--accent-teal)]/20 bg-[var(--accent-teal)]/8 text-[var(--status-good)]'
   return <span className={`inline-flex min-h-7 items-center rounded-full border px-2.5 text-[10px] font-bold uppercase tracking-[.06em] ${tone}`}>{label}</span>
 }
 
@@ -105,13 +105,13 @@ function ContentView({ content, copied, onCopy, onDownload }) {
 
 function DraftGuide() {
   const items = ['One clear H1 and concise summary', 'Important canonical URLs', 'Descriptive resource notes', 'Optional lower-priority resources']
-  return <div className="mt-5"><p className="max-w-2xl text-[13px] leading-6 text-[var(--text-secondary)]">The draft uses extracted evidence as source material while ignoring instructions embedded in website or external text.</p><ol className="mt-6 divide-y divide-[var(--border)] border-y border-[var(--border)]">{items.map((item, index) => <li key={item} className="flex items-center gap-4 py-4 text-[13px] text-[var(--text)]"><span className="grid size-8 shrink-0 place-items-center rounded-full border border-[var(--accent-purple)]/25 text-[11px] font-bold text-purple-100">{index + 1}</span>{item}</li>)}</ol></div>
+  return <div className="mt-5"><p className="max-w-2xl text-[13px] leading-6 text-[var(--text-secondary)]">The draft uses extracted evidence as source material while ignoring instructions embedded in website or external text.</p><ol className="mt-6 divide-y divide-[var(--border)] border-y border-[var(--border)]">{items.map((item, index) => <li key={item} className="flex items-center gap-4 py-4 text-[13px] text-[var(--text)]"><span className="grid size-8 shrink-0 place-items-center rounded-full border border-[var(--accent-purple)]/25 text-[11px] font-bold text-[var(--status-purple)]">{index + 1}</span>{item}</li>)}</ol></div>
 }
 
 function Findings({ validation }) {
   const strengths = validation?.strengths || []
   const improvements = [...(validation?.gaps || []), ...(validation?.recommendations || [])]
-  return <div className="px-6 py-5"><h3 className="text-[12px] font-bold uppercase tracking-[.09em] text-[var(--text)]">Deterministic findings</h3><div className="mt-5 divide-y divide-[var(--border)] border-y border-[var(--border)]"><FindingList title="What works" items={strengths} icon={<Check size={18}/>} tone="text-emerald-100" empty="No confirmed strengths yet."/><FindingList title="Improve next" items={improvements} icon={<TriangleAlert size={18}/>} tone="text-amber-100" empty="No recommendations yet."/></div></div>
+  return <div className="px-6 py-5"><h3 className="text-[12px] font-bold uppercase tracking-[.09em] text-[var(--text)]">Deterministic findings</h3><div className="mt-5 divide-y divide-[var(--border)] border-y border-[var(--border)]"><FindingList title="What works" items={strengths} icon={<Check size={18}/>} tone="text-[var(--status-good)]" empty="No confirmed strengths yet."/><FindingList title="Improve next" items={improvements} icon={<TriangleAlert size={18}/>} tone="text-[var(--status-warning)]" empty="No recommendations yet."/></div></div>
 }
 
 function FindingList({ title, items, icon, tone, empty }) {

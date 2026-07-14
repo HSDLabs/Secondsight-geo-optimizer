@@ -182,10 +182,10 @@ export function findNodePath(node, nodeId, path = []) {
 }
 
 export function scoreVerdict(score) {
-  if (score >= 90) return { label: 'Highly parseable', tone: 'text-emerald-300 bg-emerald-400/10 border-emerald-400/20' }
-  if (score >= 75) return { label: 'Parseable', tone: 'text-emerald-300 bg-emerald-400/10 border-emerald-400/20' }
-  if (score >= 55) return { label: 'Needs improvement', tone: 'text-amber-300 bg-amber-400/10 border-amber-400/20' }
-  return { label: 'Difficult to parse', tone: 'text-rose-300 bg-rose-400/10 border-rose-400/20' }
+  if (score >= 90) return { label: 'Highly parseable', tone: 'text-[var(--status-good)] bg-[var(--accent-teal)]/10 border-[var(--accent-teal)]/20' }
+  if (score >= 75) return { label: 'Parseable', tone: 'text-[var(--status-good)] bg-[var(--accent-teal)]/10 border-[var(--accent-teal)]/20' }
+  if (score >= 55) return { label: 'Needs improvement', tone: 'text-[var(--status-warning)] bg-[var(--accent-amber)]/10 border-[var(--accent-amber)]/20' }
+  return { label: 'Difficult to parse', tone: 'text-[var(--status-danger)] bg-[var(--accent-red)]/10 border-[var(--accent-red)]/20' }
 }
 
 function hasRole(data, role) {

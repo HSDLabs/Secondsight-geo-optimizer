@@ -3,11 +3,11 @@ import SectionShell from './SectionShell'
 import { getInterpretationCards } from './utils/analysisViewModel'
 
 const cardConfig = {
-  identity: { icon: Fingerprint, iconTone: 'border-[var(--accent-amber)]/25 bg-[var(--accent-amber)]/10 text-amber-100' },
-  structure: { icon: Network, iconTone: 'border-[var(--accent-purple)]/25 bg-[var(--accent-purple)]/10 text-purple-100' },
-  content: { icon: FileSearch, iconTone: 'border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 text-blue-100' },
-  knowledge: { icon: Boxes, iconTone: 'border-[var(--accent-purple)]/25 bg-[var(--accent-purple)]/10 text-purple-100' },
-  accessibility: { icon: Accessibility, iconTone: 'border-[var(--accent-teal)]/25 bg-[var(--accent-teal)]/10 text-emerald-100' }
+  identity: { icon: Fingerprint, iconTone: 'border-[var(--accent-amber)]/25 bg-[var(--accent-amber)]/10 text-[var(--status-warning)]' },
+  structure: { icon: Network, iconTone: 'border-[var(--accent-purple)]/25 bg-[var(--accent-purple)]/10 text-[var(--status-purple)]' },
+  content: { icon: FileSearch, iconTone: 'border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 text-[var(--status-info)]' },
+  knowledge: { icon: Boxes, iconTone: 'border-[var(--accent-purple)]/25 bg-[var(--accent-purple)]/10 text-[var(--status-purple)]' },
+  accessibility: { icon: Accessibility, iconTone: 'border-[var(--accent-teal)]/25 bg-[var(--accent-teal)]/10 text-[var(--status-good)]' }
 }
 
 export default function InterpretationSection({ data, progressState, issues = [] }) {
@@ -27,7 +27,7 @@ function InterpretationCard({ card, issues }) {
   const config = cardConfig[card.id]
   const Icon = config.icon
   return (
-    <article className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-darker)]/45 p-5 transition duration-200 hover:-translate-y-0.5 hover:border-white/15">
+    <article className="mu-hover-card flex min-w-0 flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-darker)]/45 p-5 transition duration-200 hover:-translate-y-0.5 hover:border-white/15">
       <header className="flex min-w-0 items-center gap-3">
         <span className={`grid size-10 shrink-0 place-items-center rounded-xl border ${config.iconTone}`}><Icon size={20} strokeWidth={1.8} /></span>
         <h3 className="min-w-0 text-[14px] font-semibold leading-5 tracking-[-0.01em] text-[var(--text)]">{card.title}</h3>
@@ -72,11 +72,11 @@ function ConfidenceFooter({ certainty, confidence, issueCount }) {
   const observed = certainty === 'Observed'
   const hasIssues = issueCount > 0
   const badgeTone = hasIssues
-    ? 'bg-amber-400/8 text-amber-300'
-    : observed ? 'bg-emerald-400/8 text-emerald-300' : 'bg-violet-400/8 text-violet-300'
-  const barTone = hasIssues ? 'bg-amber-400' : observed ? 'bg-emerald-400' : 'bg-violet-400'
+    ? 'bg-[var(--accent-amber)]/10 text-[var(--status-warning)]'
+    : observed ? 'bg-[var(--accent-teal)]/10 text-[var(--status-good)]' : 'bg-[var(--accent-purple)]/10 text-[var(--status-purple)]'
+  const barTone = hasIssues ? 'bg-[var(--accent-amber)]' : observed ? 'bg-[var(--accent-teal)]' : 'bg-[var(--accent-purple)]'
   return (
-    <div className="mt-auto border-t border-slate-700/25 pt-4" title="Evidence confidence reflects the coverage and provenance of scan inputs, not page quality.">
+    <div className="mt-auto border-t border-[var(--border)] pt-4" title="Evidence confidence reflects the coverage and provenance of scan inputs, not page quality.">
       <div className="flex items-center justify-between gap-2">
         <span className="text-[11px] text-[var(--text-secondary)]">Evidence confidence</span>
         <strong className="text-[11px] font-semibold tabular-nums text-[var(--text)]">{confidence}%</strong>
@@ -86,9 +86,9 @@ function ConfidenceFooter({ certainty, confidence, issueCount }) {
           {hasIssues ? <AlertTriangle size={14} /> : observed ? <Eye size={14} /> : <Sparkles size={14} />}
           {hasIssues ? `${issueCount} issue${issueCount === 1 ? '' : 's'}` : certainty}
         </span>
-        {hasIssues && <span className={`text-[10px] ${observed ? 'text-emerald-100' : 'text-purple-100'}`}>{certainty}</span>}
+        {hasIssues && <span className={`text-[10px] ${observed ? 'text-[var(--status-good)]' : 'text-[var(--status-purple)]'}`}>{certainty}</span>}
       </div>
-      <div className="mt-2 h-1 overflow-hidden rounded-full bg-slate-800"><span className={`block h-full rounded-full transition-[width] duration-500 ${barTone}`} style={{ width: `${confidence}%` }} /></div>
+      <div className="mt-2 h-1 overflow-hidden rounded-full bg-[var(--panel-raised)]"><span className={`block h-full rounded-full transition-[width] duration-500 ${barTone}`} style={{ width: `${confidence}%` }} /></div>
     </div>
   )
 }
@@ -102,12 +102,12 @@ function getValueStatus(cardId, label, value) {
   const passState = cardId === 'accessibility' && ['Heading hierarchy', 'Landmark quality'].includes(label) && !warning && !unavailable
   const attention = cardId === 'content' && label === 'Content depth' && ['light', 'thin'].includes(lower)
 
-  if (unavailable) return { display: text, tone: 'text-slate-600' }
-  if (warning || attention) return { display: label === 'Warnings' ? text : text, tone: 'text-amber-300', icon: 'warning' }
-  if (checkState) return { display: '', tone: 'text-emerald-300', icon: 'check' }
-  if (cardId === 'structure' && label === 'Hierarchy') return { display: 'Pass', tone: 'text-emerald-300' }
-  if (cardId === 'structure' && label === 'ARIA snapshot') return { display: 'Captured', tone: 'text-emerald-300' }
-  if (passState) return { display: 'Pass', tone: 'text-emerald-300' }
-  if (label === 'Warnings' && Number(value) === 0) return { display: '0', tone: 'text-emerald-300' }
-  return { display: text, tone: 'text-emerald-300' }
+  if (unavailable) return { display: text, tone: 'text-[var(--text-secondary)]' }
+  if (warning || attention) return { display: text, tone: 'text-[var(--status-warning)]', icon: 'warning' }
+  if (checkState) return { display: '', tone: 'text-[var(--status-good)]', icon: 'check' }
+  if (cardId === 'structure' && label === 'Hierarchy') return { display: 'Pass', tone: 'text-[var(--status-good)]' }
+  if (cardId === 'structure' && label === 'ARIA snapshot') return { display: 'Captured', tone: 'text-[var(--status-good)]' }
+  if (passState) return { display: 'Pass', tone: 'text-[var(--status-good)]' }
+  if (label === 'Warnings' && Number(value) === 0) return { display: '0', tone: 'text-[var(--status-good)]' }
+  return { display: text, tone: 'text-[var(--status-good)]' }
 }

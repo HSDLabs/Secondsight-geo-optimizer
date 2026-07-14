@@ -1,5 +1,5 @@
 :root {
-  color: #f0f0f5;
+  color: #0f172a;
   background: var(--bg);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -9,66 +9,81 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  --bg: #0a0a0f;
-  --panel: #111118;
-  --panel-soft: #15151e;
-  --panel-raised: #1a1a24;
-  --border: rgba(255, 255, 255, 0.075);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --text: #f0f0f5;
-  --muted: #8888a0;
-  --faint: #5f5f76;
-  --text-secondary: #9898ad;
-  --text-muted: #55556b;
-  --accent: #4f7cff;
-  --accent-blue: #4f7cff;
-  --accent-purple: #9b6dff;
-  --accent-teal: #00d4aa;
-  --accent-amber: #f59e0b;
-  --accent-red: #f43f5e;
-  --good: #00d4aa;
-  --warning: #f59e0b;
-  --poor: #f43f5e;
+  --bg: #F8FAFC;
+  --panel: #FEFEFE;
+  --panel-soft: #F1F5F9;
+  --panel-raised: #E2E8F0;
+  --border: #bbc0c7;
+  --border-strong: #CBD5E1;
+  /* --border-strong: #CBD5E1; */
+  --text: #0F172A;
+  --muted: #475569;
+  --faint: #64748B;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --accent: #2563EB;
+  --accent-blue: #2563EB;
+  --accent-purple: #7C3AED;
+  --accent-teal: #0F766E;
+  --accent-amber: #D97706;
+  --accent-red: #DC2626;
+  --good: #16A34A;
+  --warning: #D97706;
+  --poor: #DC2626;
+  --status-good: #047857;
+  --status-warning: #B45309;
+  --status-danger: #B91C1C;
+  --status-info: #1D4ED8;
+  --status-purple: #6D28D9;
 
   /* Additional thematic aliases */
-  --bg-darker: #07070b;
-  --bg-dark: #0d0d13;
-  --chrome-bg: #13131b;
-  --header-bg: #0e0e14;
-  --code-bg: #0c0c12;
-  --tooltip-bg: #181821;
-  --highlight-bg: #171b32;
-  --topbar-bg: rgba(10, 10, 15, 0.9);
-  --overlay-rgb: 255, 255, 255;
+  --bg-darker: #F1F5F9;
+  --bg-dark: #E2E8F0;
+  --chrome-bg: #FEFEFE;
+  --header-bg: #FEFEFE;
+  --code-bg: #F1F5F9;
+  --tooltip-bg: #FFFFFF;
+  --highlight-bg: #DBEAFE;
+  --topbar-bg: rgba(248, 250, 252, .94);
+  --overlay-rgb: 15, 23, 42;
 }
 
-:root[data-theme="light"] {
-  color: #1e293b;
-  background: #f8fafc;
-  --bg: #f8fafc;
-  --panel: #ffffff;
-  --panel-soft: #f1f5f9;
-  --panel-raised: #e2e8f0;
-  --border: #cbd5e1;
-  --border-strong: #94a3b8;
-  --text: #1e293b;
-  --muted: #475569;
-  --faint: #64748b;
-  --accent: #2563eb;
-  --good: #16a34a;
-  --warning: #d97706;
-  --poor: #dc2626;
-  --overlay-rgb: 0, 0, 0;
-
-  /* Additional thematic aliases */
-  --bg-darker: #e2e8f0;
-  --bg-dark: #cbd5e1;
-  --chrome-bg: #f8fafc;
-  --header-bg: #e2e8f0;
-  --code-bg: #f1f5f9;
-  --tooltip-bg: #e2e8f0;
-  --highlight-bg: #dbeafe;
-  --topbar-bg: rgba(248, 250, 252, 0.86);
+:root[data-theme="dark"] {
+  color: #f0f0f5;
+  --bg: #0A0A0F;
+  --panel: #111118;
+  --panel-soft: #15151E;
+  --panel-raised: #1C1C28;
+  --border: rgba(255, 255, 255, .075);
+  --border-strong: rgba(255, 255, 255, .14);
+  --text: #F0F0F5;
+  --muted: #8888A0;
+  --faint: #5F5F76;
+  --text-secondary: #9898AD;
+  --text-muted: #55556B;
+  --accent: #4F7CFF;
+  --accent-blue: #4F7CFF;
+  --accent-purple: #9B6DFF;
+  --accent-teal: #00D4AA;
+  --accent-amber: #F59E0B;
+  --accent-red: #F43F5E;
+  --good: #00D4AA;
+  --warning: #F59E0B;
+  --poor: #F43F5E;
+  --status-good: #5EEAD4;
+  --status-warning: #FBBF24;
+  --status-danger: #FDA4AF;
+  --status-info: #93C5FD;
+  --status-purple: #C4B5FD;
+  --bg-darker: #07070B;
+  --bg-dark: #0D0D13;
+  --chrome-bg: #13131B;
+  --header-bg: #0E0E14;
+  --code-bg: #0C0C12;
+  --tooltip-bg: #181821;
+  --highlight-bg: #171B32;
+  --topbar-bg: rgba(10, 10, 15, .9);
+  --overlay-rgb: 255, 255, 255;
 }
 
 * {
@@ -117,7 +132,7 @@ button:disabled {
 }
 
 a {
-  color: #9ccaff;
+  color: var(--accent);
   text-decoration: none;
 }
 
@@ -250,8 +265,8 @@ p a:hover,
   min-height: 40px;
   padding: 0 16px;
   color: #f7f8ff;
-  background: var(--accent-purple);
-  border: 1px solid color-mix(in srgb, var(--accent-purple) 72%, #f7f8ff);
+  background: var(--accent);
+  border: 1px solid var(--accent);
   border-radius: 8px;
   font-size: .75rem;
   font-weight: 720;
@@ -262,9 +277,9 @@ p a:hover,
 .url-input button svg { color: currentColor; }
 
 .url-input button:hover:not(:disabled) {
-  background: #ad89ff;
+  background: color-mix(in srgb, var(--accent) 88%, #000);
   transform: translateY(-1px);
-  box-shadow: 0 7px 18px color-mix(in srgb, var(--accent-purple) 22%, transparent);
+  box-shadow: 0 7px 18px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
 .url-input button:active:not(:disabled) {
@@ -460,7 +475,7 @@ p a:hover,
 .score-bar span {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--poor), var(--warning), var(--good));
+  background: var(--accent);
 }
 
 .comparison-grid {
@@ -990,7 +1005,7 @@ p a:hover,
   display: grid;
   grid-template-columns: 6px 1fr;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(242, 184, 75, 0.055), rgba(var(--overlay-rgb), 0.018)), var(--panel-soft);
+  background: var(--panel-soft);
   border: 1px solid rgba(242, 184, 75, 0.22);
   border-radius: 10px;
   transition: border-color 200ms ease, background 200ms ease, box-shadow 200ms ease, transform 200ms ease;
@@ -1234,14 +1249,14 @@ p a:hover,
 }
 
 .fix-btn {
-  color: #06101d;
-  background: linear-gradient(135deg, #9ccaff, #70b8ff);
+  color: #fff;
+  background: var(--accent);
   border: none;
 }
 
 .fix-btn:hover {
-  background: linear-gradient(135deg, #b0d4ff, #8cc4ff);
-  box-shadow: 0 2px 12px rgba(77, 163, 255, 0.3);
+  background: #1D4ED8;
+  box-shadow: none;
   transform: translateY(-1px);
 }
 

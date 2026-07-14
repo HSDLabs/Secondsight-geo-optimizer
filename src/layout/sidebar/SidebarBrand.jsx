@@ -6,7 +6,7 @@ export default function SidebarBrand({ isCollapsed }) {
       </span>
       <div className="sidebar-brand-copy" aria-hidden={isCollapsed}>
           <span>SecondSight</span>
-          <strong>GEO Optimizer</strong>
+          <strong>AEO Optimizer</strong>
       </div>
     </div>
   )

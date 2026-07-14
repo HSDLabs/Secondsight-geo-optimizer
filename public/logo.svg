@@ -1,29 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-label="SecondSight Cascading Pills Icon">
-  <defs>
-    <!-- Universal neon glow filter -->
-    <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <!-- Wide, soft ambient bloom -->
-      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur1" />
-      <!-- Tight, bright inner core glow -->
-      <feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur2" />
-      <!-- Merge the glows behind the sharp original shapes -->
-      <feMerge>
-        <feMergeNode in="blur1" />
-        <feMergeNode in="blur2" />
-        <feMergeNode in="SourceGraphic" />
-      </feMerge>
-    </filter>
-  </defs>
-
-  <!-- Cascading Glowing Pills -->
-  <g transform="translate(10, 16)" filter="url(#neonGlow)">
-    <!-- Layer 1: Purple -->
-    <rect x="0" y="0" width="24" height="6" rx="3" fill="#A855F7" />
-    
-    <!-- Layer 2: Blue -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" aria-label="SecondSight icon">
+  <g transform="translate(10 16)">
+    <rect width="24" height="6" rx="3" fill="#A855F7" />
     <rect x="10" y="12" width="24" height="6" rx="3" fill="#3B82F6" />
-    
-    <!-- Layer 3: Green -->
     <rect x="20" y="24" width="24" height="6" rx="3" fill="#10B981" />
   </g>
 </svg>

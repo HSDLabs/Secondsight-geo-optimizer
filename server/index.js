@@ -5,9 +5,11 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import analyzeRoutes from './routes/analyze.js';
+import aiVisibilityRoutes from './routes/aiVisibility.js';
 import crawlerRoutes from './routes/crawler.js';
-import externalWebRoutes from './routes/externalWeb.js';
+import externalIntelligenceRoutes from './routes/externalIntelligence.js';
 import settingsRoutes from './routes/settings.js';
+import { assertSingleProcessMemoryStore } from './services/externalIntelligence/store.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -21,8 +23,11 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/analyze', analyzeRoutes);
+app.use('/api/ai-visibility', aiVisibilityRoutes);
 app.use('/api/crawler', crawlerRoutes);
-app.use('/api/externalWeb', externalWebRoutes);
+assertSingleProcessMemoryStore();
+
+app.use('/api/external-intelligence', externalIntelligenceRoutes);
 app.use('/api/settings', settingsRoutes);
 
 if (process.env.NODE_ENV === 'production') {

@@ -22,30 +22,12 @@
 .mu-stagger-grid > :nth-child(n + 9) { animation-delay: 420ms; }
 
 @media (hover: hover) and (pointer: fine) {
-  .mu-stagger-grid > * {
+  .mu-hover-card {
     position: relative;
+    overflow: hidden;
     isolation: isolate;
   }
 
-  .mu-stagger-grid > *::after {
-    content: '';
-    position: absolute;
-    z-index: 2;
-    inset: 0 auto 0 -55%;
-    width: 26%;
-    background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .008), transparent);
-    pointer-events: none;
-    transform: skewX(-18deg) translateX(0);
-    transition: transform 900ms cubic-bezier(.2, .7, .2, 1);
-  }
-
-  .mu-stagger-grid > *:hover::after {
-    transform: skewX(-18deg) translateX(600%);
-  }
-
-  .mu-no-sheen > *::after {
-    display: none;
-  }
 }
 
 .mu-tab-panel {
@@ -129,7 +111,7 @@
     transition: none;
   }
 
-  .mu-stagger-grid > *::after {
+  .mu-hover-card::after {
     display: none;
   }
 }

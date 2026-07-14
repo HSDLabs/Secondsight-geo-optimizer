@@ -17,8 +17,8 @@ SecondSight GEO Optimizer is a professional-grade, dark-themed diagnostic dashbo
 ## Key Features
 
 - **Machine Understanding:** Real-time progressive timeline analyzing identity, document structure, primary content intent, extracted knowledge entities, and accessibility blockages.
-- **Crawler Access:** In-depth diagnostics for `robots.txt` compliance, sitemap parsing, indexability, and server response readiness.
-- **External Intelligence:** An aggregated view of an entity's digital footprint across the web, including real-time sentiment analysis, Reddit discussions, and recent news mentions.
+- **Crawl & Indexability:** In-depth diagnostics for `robots.txt` compliance, sitemap parsing, indexability, and server response readiness.
+- **Sources & Authority:** Capability-driven Reddit, News, X, and YouTube evidence with auditable relevance, provenance, structured findings, and partial-failure handling.
 - **Premium UI/UX:** Built with a sophisticated, highly-polished dark mode interface utilizing modern CSS techniques, glassmorphism, and responsive CSS Grid architecture.
 
 ## Tech Stack
@@ -52,6 +52,12 @@ src/
 ├── navigation.jsx               # Route and sidebar configuration
 └── main.jsx                     # Browser entrypoint
 ```
+
+## Sources & Authority configuration
+
+Configure `SCRAPEBADGER_API_KEY` for source collectors and `OPENAI_API_KEY` (or the compatible `CHATGPT_API_KEY`) for structured intelligence. `OPENAI_EXTERNAL_INTELLIGENCE_MODEL` can override the server model default. Set `VITE_EXTERNAL_INTELLIGENCE_START_MODE=manual` to require a page-level start action; the default is `automatic` after main analysis succeeds and the bounded crawler-context wait finishes.
+
+The initial run store is intentionally temporary and single-process. Results expire after 24 hours, horizontal API scaling is rejected while the memory store is active, and a shared Redis/database implementation is required before adding persistent projects or analysis history.
 
 ## Getting Started
 

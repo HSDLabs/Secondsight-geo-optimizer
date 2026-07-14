@@ -1,4 +1,4 @@
-import { computeExternalScore, computeOverallScore } from '../../../utils/scoring'
+import { computeOverallScore } from '../../../utils/scoring'
 
 const severityRank = { critical: 3, warning: 2, notice: 1 }
 
@@ -40,9 +40,9 @@ function getCategory(title) {
   return 'Structure'
 }
 
-export function buildOverviewModel({ data, crawlerData, externalData, visibilityScore }) {
+export function buildOverviewModel({ data, crawlerData, visibilityScore }) {
   const crawlerScore = crawlerData?.score ?? null
-  const externalScore = externalData ? computeExternalScore(externalData) : null
+  const externalScore = null
   const overallScore = data
     ? computeOverallScore(visibilityScore, crawlerScore, externalScore)
     : null

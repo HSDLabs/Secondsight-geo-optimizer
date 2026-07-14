@@ -92,7 +92,7 @@ export function computeVisibilityBreakdown(data) {
       { label: 'Heading Structure', value: headingBonus > 0 ? headingBonus : -(h1Issues.length * 3) }
     ],
     placeholders: [
-      'Crawler Access',
+      'Crawl & Indexability',
       'Entity Understanding',
       'Retrieval Readiness',
       'Citation Readiness'

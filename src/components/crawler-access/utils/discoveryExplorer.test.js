@@ -59,6 +59,7 @@ describe('Discovery Explorer view model', () => {
 
   it('applies search and combined filters before pagination', () => {
     const model = buildDiscoveryExplorerModel(fixture())
+    expect(filterDiscoveryRecords(model.records, { group: 'all' })).toHaveLength(model.records.length)
     expect(filterDiscoveryRecords(model.records, { group: 'other', filters: ['blocked', 'in-sitemap'] }).map(record => record.path)).toEqual(['/private'])
     expect(filterDiscoveryRecords(model.records, { group: 'articles', query: 'shipping', filters: ['noindex'] })).toHaveLength(1)
     expect(filterDiscoveryRecords(model.records, { group: 'other', filters: ['errors'] }).map(record => record.path)).toContain('/broken')
@@ -86,4 +87,3 @@ describe('crawler issue grouping', () => {
     expect(issueIdToGroupId.get('two')).toBe(groupedIssues[0].id)
   })
 })
-

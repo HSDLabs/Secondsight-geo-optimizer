@@ -10,6 +10,7 @@ import SitemapExplorer from './SitemapExplorer'
 import DiscoveryExplorer from './DiscoveryExplorer'
 import CrawlerIssues from './CrawlerIssues'
 import LlmsTxtAssistant from './LlmsTxtAssistant'
+import CrawlerEmptyState from './CrawlerEmptyState'
 import { groupCrawlerIssues } from './utils/issueGrouping'
 
 export default function CrawlerAccess() {
@@ -79,7 +80,9 @@ export default function CrawlerAccess() {
         isAwaiting={isAwaiting}
       />
 
-      <div style={{ opacity: isAwaiting ? 0.6 : 1, pointerEvents: isAwaiting || showLoading ? 'none' : 'auto', transition: 'opacity 0.3s' }}>
+      {isAwaiting && <CrawlerEmptyState loading={showLoading} />}
+
+      {!isAwaiting && <div className={showLoading ? 'pointer-events-none opacity-60 transition-opacity' : 'transition-opacity'}>
         {/* 2. Crawler Access List */}
         <CrawlerPermissions
           key={crawlerData?.analyzedAt || 'awaiting-crawler-analysis'}
@@ -89,8 +92,8 @@ export default function CrawlerAccess() {
           onShowIssue={showIssue}
         />
 
-        <div className="mt-4 grid min-w-0 items-stretch gap-4 2xl:grid-cols-2">
-          <RobotsViewer robots={robots} onShowIssue={showIssue} />
+        <div className="mt-4 grid min-w-0 items-start gap-4 2xl:grid-cols-2">
+          <RobotsViewer robots={robots} sitemaps={sitemaps} origin={origin} onShowIssue={showIssue} />
           <SitemapExplorer sitemaps={sitemaps} />
         </div>
 
@@ -108,7 +111,7 @@ export default function CrawlerAccess() {
           onRetest={reanalyze}
           loading={showLoading}
         />
-      </div>
+      </div>}
     </div>
   )
 }

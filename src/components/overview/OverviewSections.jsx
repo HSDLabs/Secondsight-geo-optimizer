@@ -3,39 +3,112 @@ import { NavLink } from 'react-router-dom'
 import {
   ArrowRight,
   Clock,
-  LockKeyhole,
 } from '../icons/heroicons'
 import {
-  CitationIcon,
-  ContentGapsIcon,
   CrawlerIcon,
   FocusIcon,
   IntelligenceIcon,
   QuickWinIcon,
   RecommendationsIcon,
-  RetrievalIcon,
   SuccessIcon,
-  TrendIcon,
   UnderstandingIcon,
 } from '../../components/icons'
 import { toneFor, verdictFor } from './utils/overviewModel'
 
 const pillarMeta = [
-  { key: 'crawler', label: 'Crawler access', icon: CrawlerIcon, path: '/crawler-access', description: 'Can AI crawlers reach and render your pages?' },
+  { key: 'crawler', label: 'Crawl & indexability', icon: CrawlerIcon, path: '/crawl-indexability', description: 'Can AI crawlers reach, render, and index your pages?' },
   { key: 'understanding', label: 'Machine understanding', icon: UnderstandingIcon, path: '/ai-understanding', description: 'Can machines extract your structure and meaning?' },
-  { key: 'external', label: 'External intelligence', icon: IntelligenceIcon, path: '/content-intelligence', description: 'How the wider web supports your authority.' },
+  { key: 'external', label: 'Sources & authority', icon: IntelligenceIcon, path: '/sources-authority', description: 'How the wider web supports your authority.' },
 ]
 
-const futurePillars = [
-  { label: 'Retrieval readiness', icon: RetrievalIcon },
-  { label: 'Citation readiness', icon: CitationIcon },
-  { label: 'Content gaps', icon: ContentGapsIcon },
+const emptyPillars = [
+  {
+    label: 'Crawl & indexability',
+    icon: CrawlerIcon,
+    path: '/crawl-indexability',
+    description: 'Checks whether crawlers can access, render, and discover important pages.',
+    evidence: 'Robots rules, status codes, sitemaps, canonicals, and rendering',
+  },
+  {
+    label: 'Machine understanding',
+    icon: UnderstandingIcon,
+    path: '/ai-understanding',
+    description: 'Checks whether machines can parse the page structure, content, and entities.',
+    evidence: 'Semantic structure, readable content, metadata, and accessibility',
+  },
+  {
+    label: 'Sources & authority',
+    icon: IntelligenceIcon,
+    path: '/sources-authority',
+    description: 'Checks the external evidence that supports brand authority and reputation.',
+    evidence: 'Available sources, entity associations, and supporting evidence',
+  },
 ]
 
 const panelIconProps = { size: 18, strokeWidth: 1.7 }
 const pillarIconProps = { size: 22, strokeWidth: 1.7 }
 const quickWinIconProps = { size: 20, strokeWidth: 1.7 }
 const focusIconProps = { size: 18, strokeWidth: 1.7 }
+
+export function OverviewEmptyState({ onStart }) {
+  return (
+    <div className="overview-pre-scan">
+      <section className="overview-panel overview-baseline-card" aria-labelledby="overview-baseline-title">
+        <div className="overview-baseline-copy">
+          <div className="overview-baseline-content">
+            <span className="overview-kicker">Visibility baseline</span>
+            <h2 id="overview-baseline-title">No baseline yet</h2>
+            <p>Run your first scan to establish how prepared this site is for AI discovery.</p>
+            <ul>
+              <li><CrawlerIcon /> Crawl & indexability</li>
+              <li><UnderstandingIcon /> Machine understanding</li>
+              <li><IntelligenceIcon /> Sources & authority</li>
+            </ul>
+            <button type="button" className="overview-start-button" onClick={onStart}>Run first scan <ArrowRight size={14} strokeWidth={1.7} /></button>
+          </div>
+          <div className="overview-baseline-illustration" aria-hidden="true">
+            <img src="/secondsight-radar-illustration.svg" alt="" />
+          </div>
+        </div>
+        <div className="overview-first-scan-value">
+          <span className="overview-section-icon"><RecommendationsIcon {...panelIconProps} /></span>
+          <div>
+            <span className="overview-kicker">What the first scan establishes</span>
+            <h3>A useful baseline, not placeholder scores.</h3>
+          </div>
+          <ul>
+            <li><SuccessIcon /> Your strongest and weakest live signal</li>
+            <li><SuccessIcon /> High-impact blockers grounded in evidence</li>
+            <li><SuccessIcon /> Quick improvements worth addressing first</li>
+            <li><SuccessIcon /> The evidence behind every finding</li>
+          </ul>
+        </div>
+      </section>
+
+      <section className="overview-pre-scan-pillars" aria-labelledby="overview-measures-title">
+        <div className="overview-pre-scan-heading">
+          <span className="overview-kicker">Live analysis areas</span>
+          <h2 id="overview-measures-title">What SecondSight measures</h2>
+          <p>Each area becomes evidence-backed after the first scan.</p>
+        </div>
+        <div className="overview-pre-scan-grid">
+          {emptyPillars.map(pillar => {
+            const Icon = pillar.icon
+            return (
+              <article key={pillar.label} className="overview-panel overview-pre-scan-pillar">
+                <div className="overview-pre-scan-pillar-top"><span className="overview-icon-box"><Icon {...pillarIconProps} /></span><span>Not analyzed</span></div>
+                <h3>{pillar.label}</h3>
+                <p>{pillar.description}</p>
+                <div className="overview-inspects"><strong>Inspects</strong><span>{pillar.evidence}</span></div>
+                <NavLink to={pillar.path}>Learn what is checked <ArrowRight size={13} strokeWidth={1.7} /></NavLink>
+              </article>
+            )
+          })}
+        </div>
+      </section>
+    </div>
+  )
+}
 
 function useAnimatedNumber(value) {
   const [display, setDisplay] = useState(value ?? 0)
@@ -121,7 +194,7 @@ export function IssuesPanel({ issues, hasResults }) {
         <div className="overview-issue-table">
           <div className="overview-table-labels"><span>Issue</span><span>Impact</span><span>Affected</span></div>
           {issues.map((issue, index) => (
-            <NavLink key={`${issue.title}-${index}`} to={issue.category === 'Technical' ? '/crawler-access' : '/ai-understanding'} className="overview-issue-row">
+            <NavLink key={`${issue.title}-${index}`} to={issue.category === 'Technical' ? '/crawl-indexability' : '/ai-understanding'} className="overview-issue-row">
               <span className="overview-row-number">{index + 1}</span>
               <span className="overview-issue-copy"><strong>{issue.title}</strong><small>{issue.detail}</small></span>
               <span className={`overview-impact tone-${issue.severity}`}>{issue.impact}</span>
@@ -144,12 +217,12 @@ export function QuickWinsPanel({ wins, hasResults }) {
         icon={QuickWinIcon}
         title="Quick wins"
         description="Focused actions that can improve visibility with less effort."
-        action={hasResults && <NavLink to="/recommendations" className="overview-text-action">All recommendations <ArrowRight size={13} strokeWidth={1.7} /></NavLink>}
+        action={hasResults && <NavLink to="/opportunities" className="overview-text-action">All recommendations <ArrowRight size={13} strokeWidth={1.7} /></NavLink>}
       />
       {wins.length ? (
         <div className="overview-win-list">
           {wins.map((win, index) => (
-            <NavLink key={`${win.action}-${index}`} to={win.category === 'Technical' ? '/crawler-access' : '/ai-understanding'} className="overview-win-row">
+            <NavLink key={`${win.action}-${index}`} to={win.category === 'Technical' ? '/crawl-indexability' : '/ai-understanding'} className="overview-win-row">
               <span className="overview-win-icon"><FocusIcon {...quickWinIconProps} /></span>
               <span className="overview-issue-copy"><strong>{win.action}</strong><small>{win.detail}</small></span>
               <span className="overview-win-meta"><b>{win.impact} impact</b><small>{win.effort}</small></span>
@@ -173,49 +246,20 @@ function EmptyState({ hasResults, label }) {
   )
 }
 
-export function HistoryPlaceholder() {
-  return (
-    <section className="overview-panel overview-history">
-      <PanelHeader
-        icon={TrendIcon}
-        title="GEO score history"
-        description="Compare scans and measure how fixes affect visibility over time."
-        action={<span className="overview-dev-badge"><LockKeyhole size={11} strokeWidth={1.7} /> In development</span>}
-      />
-      <div className="overview-chart-placeholder" aria-label="Historical tracking placeholder">
-        <div className="overview-chart-grid" />
-        <div className="overview-chart-line" />
-        <div className="overview-chart-lock"><LockKeyhole size={16} strokeWidth={1.7} /><span>Historical tracking becomes available when scan history is supported.</span></div>
-      </div>
-    </section>
-  )
-}
-
 export function FocusPanel({ weakest, issues }) {
-  const labels = { crawler: 'Crawler access', understanding: 'Machine understanding', external: 'External intelligence' }
+  const labels = { crawler: 'Crawl & indexability', understanding: 'Machine understanding', external: 'Sources & authority' }
   const focusLabel = weakest ? labels[weakest[0]] : 'Run your first scan'
 
   return (
     <section className="overview-panel overview-focus-panel">
       <PanelHeader icon={FocusIcon} title="What to focus on next" description="A short path toward the next score tier." />
       <div className="overview-focus-list">
-        <NavLink to={weakest?.[0] === 'crawler' ? '/crawler-access' : '/ai-understanding'}>
+        <NavLink to={weakest?.[0] === 'crawler' ? '/crawl-indexability' : '/ai-understanding'}>
           <span className="tone-warning"><FocusIcon {...focusIconProps} /></span><strong>Improve {focusLabel}</strong><small>{weakest ? `Currently your lowest live pillar at ${Math.round(weakest[1])}.` : 'Establish a baseline before prioritizing work.'}</small><ArrowRight size={13} strokeWidth={1.7} />
         </NavLink>
         <NavLink to="/ai-understanding"><span className="tone-good"><SuccessIcon {...focusIconProps} /></span><strong>Resolve high-impact issues</strong><small>{issues.length ? `${issues.length} prioritized issue groups are ready to review.` : 'High-impact issues will be grouped here.'}</small><ArrowRight size={13} strokeWidth={1.7} /></NavLink>
-        <NavLink to="/recommendations"><span className="tone-accent"><QuickWinIcon {...focusIconProps} /></span><strong>Implement quick wins</strong><small>Apply focused fixes, then scan again to verify the result.</small><ArrowRight size={13} strokeWidth={1.7} /></NavLink>
+        <NavLink to="/opportunities"><span className="tone-accent"><QuickWinIcon {...focusIconProps} /></span><strong>Implement quick wins</strong><small>Apply focused fixes, then scan again to verify the result.</small><ArrowRight size={13} strokeWidth={1.7} /></NavLink>
       </div>
     </section>
-  )
-}
-
-export function FuturePillars() {
-  return (
-    <div className="overview-future-row" aria-label="Capabilities in development">
-      {futurePillars.map(item => {
-        const Icon = item.icon
-        return <span key={item.label}><Icon size={13} strokeWidth={1.7} />{item.label}<b>Planned</b></span>
-      })}
-    </div>
   )
 }

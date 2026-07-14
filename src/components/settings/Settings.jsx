@@ -1,4 +1,11 @@
 import { useState, useEffect } from 'react'
+import { getApiControls, setApiControl, subscribeToApiControls } from '../../utils/featureControls'
+
+const API_CONTROLS = [
+  ['crawler', 'Crawl & Indexability', 'Stops crawler analysis and crawler page requests.'],
+  ['sources', 'Sources & Authority', 'Stops capability checks, searches, runs, and polling.'],
+  ['aiVisibility', 'AI Visibility', 'Stops all AI Visibility provider and results requests.']
+]
 
 const BracesIcon = () => (
   <span style={{ fontFamily: 'monospace', color: 'var(--muted)', fontSize: '1rem', marginRight: '12px', opacity: 0.7 }}>
@@ -203,7 +210,8 @@ const EnvVarRow = ({ name, value, description, onSave }) => {
 }
 
 export default function Settings() {
-  const [theme, setTheme] = useState(() => localStorage.getItem('secondsight-theme') || 'system')
+  const [theme, setTheme] = useState(() => localStorage.getItem('secondsight-theme') === 'dark' ? 'dark' : 'light')
+  const [apiControls, setApiControls] = useState(getApiControls)
   const [env, setEnv] = useState({
     GOOGLE_API_KEY: '',
     SCRAPEBADGER_API_KEY: '',
@@ -214,7 +222,10 @@ export default function Settings() {
 
   useEffect(() => {
     localStorage.setItem('secondsight-theme', theme)
+    document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
+
+  useEffect(() => subscribeToApiControls(setApiControls), [])
 
   useEffect(() => {
     fetch('/api/settings/env')
@@ -248,7 +259,7 @@ export default function Settings() {
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <p style={{ color: 'var(--faint)', fontSize: '0.95rem', margin: '0', lineHeight: 1.5 }}>
-            Choose your preferred theme for the GEO Optimizer interface. Select 'System' to automatically match your OS settings.
+            Light is the default appearance. You can switch to dark mode when needed.
           </p>
           
           <div style={{ 
@@ -259,7 +270,7 @@ export default function Settings() {
             border: '1px solid var(--border)',
             alignSelf: 'flex-start'
           }}>
-            {['system', 'dark', 'light'].map(t => (
+            {['light', 'dark'].map(t => (
               <button
                 key={t}
                 onClick={() => setTheme(t)}
@@ -284,6 +295,33 @@ export default function Settings() {
         </div>
       </section>
 
+      <section className="section-block mb-8 overflow-hidden p-0">
+        <div className="px-7 pb-5 pt-7">
+          <h3 className="m-0 text-[1.1rem] font-semibold text-[var(--text)]">API Usage Controls</h3>
+          <p className="mb-0 mt-2 text-sm leading-6 text-[var(--faint)]">Disable unused sections while developing or testing. Changes apply to this browser and stop new requests.</p>
+        </div>
+        <div className="border-t border-[var(--border)] bg-[var(--bg)]">
+          {API_CONTROLS.map(([key, label, description]) => (
+            <div className="flex items-center justify-between gap-5 border-b border-[var(--border)] px-7 py-4 last:border-b-0" key={key}>
+              <div>
+                <strong className="block text-sm font-semibold text-[var(--text)]">{label}</strong>
+                <span className="mt-1 block text-xs leading-5 text-[var(--faint)]">{description}</span>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={apiControls[key]}
+                aria-label={`${label} API requests`}
+                onClick={() => setApiControl(key, !apiControls[key])}
+                className={`relative h-6 w-11 shrink-0 rounded-full border transition-colors ${apiControls[key] ? 'border-blue-400/40 bg-blue-500' : 'border-[var(--border-strong)] bg-[var(--panel-raised)]'}`}
+              >
+                <span className={`absolute left-1 top-1/2 h-4 w-4 -translate-y-1/2 rounded-full bg-white shadow-sm transition-transform ${apiControls[key] ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="section-block" style={{ padding: '0', overflow: 'hidden' }}>
         <div style={{ padding: '28px 28px 20px' }}>
           <h3 style={{ fontSize: '1.1rem', color: 'var(--text)', margin: '0 0 8px', fontWeight: 600 }}>Environment Variables</h3>
@@ -305,14 +343,14 @@ export default function Settings() {
               name="GOOGLE_API_KEY"
               value={env.GOOGLE_API_KEY}
               onSave={handleSaveEnv}
-              description="Used by the External Intelligence module to query Google News and Reddit discussions across the web to gauge brand sentiment and reputation."
+              description="Used by Sources & Authority to query supported public sources through server-side collectors."
             />
             
             <EnvVarRow 
               name="SCRAPEBADGER_API_KEY"
               value={env.SCRAPEBADGER_API_KEY}
               onSave={handleSaveEnv}
-              description="Provides robust, proxy-backed cloud headless browsing. Used by the Crawler Access module to test how various AI bots render and parse your site."
+              description="Provides robust, proxy-backed cloud headless browsing. Used by Crawl & Indexability to test how various AI bots render and parse your site."
             />
 
             <EnvVarRow
@@ -326,7 +364,7 @@ export default function Settings() {
               name="CHATGPT_API_KEY"
               value={env.CHATGPT_API_KEY}
               onSave={handleSaveEnv}
-              description="Used by the Machine Understanding module to synthesize visibility reports and by the External Intelligence module to interpret sentiment from raw web data."
+              description="Used by Machine Readability and by Sources & Authority for evidence-backed structured intelligence."
             />
           </div>
         )}

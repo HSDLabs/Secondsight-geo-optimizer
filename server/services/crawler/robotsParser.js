@@ -1,7 +1,5 @@
 import { CRAWLER_CATALOG } from '../../../shared/crawlers.js'
 
-export const AI_CRAWLERS = CRAWLER_CATALOG.map(crawler => crawler.token)
-
 export function parseRobotsTxt(raw) {
   const lines = String(raw || '').replace(/^\uFEFF/, '').split(/\r?\n/)
   const groups = []

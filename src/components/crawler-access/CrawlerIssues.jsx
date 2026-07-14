@@ -5,11 +5,11 @@ import { presentIssue } from './utils/issuePresentation'
 import CrawlerLogo from './CrawlerLogo'
 
 const severityTone = {
-  critical: { badge: 'border-[var(--accent-red)]/25 bg-[var(--accent-red)]/10 text-rose-100', label: 'High' },
-  warning: { badge: 'border-[var(--accent-amber)]/25 bg-[var(--accent-amber)]/10 text-amber-100', label: 'Medium' },
-  info: { badge: 'border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 text-blue-100', label: 'Low' }
+  critical: { badge: 'border-[var(--accent-red)]/25 bg-[var(--accent-red)]/10 text-[var(--status-danger)]', label: 'High' },
+  warning: { badge: 'border-[var(--accent-amber)]/25 bg-[var(--accent-amber)]/10 text-[var(--status-warning)]', label: 'Medium' },
+  info: { badge: 'border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 text-[var(--status-info)]', label: 'Low' }
 }
-const effortTone = { Low: 'text-emerald-200', Medium: 'text-amber-200', High: 'text-rose-200' }
+const effortTone = { Low: 'text-[var(--status-good)]', Medium: 'text-[var(--status-warning)]', High: 'text-[var(--status-danger)]' }
 
 export default function CrawlerIssues({ sortedIssues, expandedIssues, setExpandedIssues, onRetest, loading }) {
   const [retestingId, setRetestingId] = useState('')
@@ -27,7 +27,7 @@ export default function CrawlerIssues({ sortedIssues, expandedIssues, setExpande
     <section className="mt-4 min-w-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--panel)]" id="crawler-issues" aria-labelledby="crawler-issues-title">
       <header className="flex flex-wrap items-start justify-between gap-4 border-b border-[var(--border)] px-6 py-5">
         <div><p className="m-0 text-[11px] font-bold uppercase tracking-[.14em] text-[var(--accent-blue)]">Crawler issues</p><h2 id="crawler-issues-title" className="mt-2 text-base font-bold text-[var(--text)]">6. Grouped Action Queue</h2><p className="mt-1 text-[13px] leading-5 text-[var(--text-secondary)]">Equivalent findings appear once with every affected URL, crawler, source line, and occurrence.</p></div>
-        <button type="button" onClick={() => document.getElementById('crawler-issues-table')?.focus()} className="inline-flex min-h-10 items-center gap-2 text-[12px] font-semibold text-[var(--accent-blue)] hover:text-blue-200">Review {issues.length} group{issues.length === 1 ? '' : 's'} <ArrowRight size={16}/></button>
+        <button type="button" onClick={() => document.getElementById('crawler-issues-table')?.focus()} className="inline-flex min-h-10 items-center gap-2 text-[12px] font-semibold text-[var(--accent-blue)] hover:text-[var(--status-info)]">Review {issues.length} group{issues.length === 1 ? '' : 's'} <ArrowRight size={16}/></button>
       </header>
 
       {issues.length ? <>
@@ -41,7 +41,7 @@ export default function CrawlerIssues({ sortedIssues, expandedIssues, setExpande
 
         <div className="divide-y divide-[var(--border)] lg:hidden">{issues.map(issue => <MobileIssue key={issue.id} issue={issue} expanded={!!expandedIssues[issue.id]} toggle={() => toggle(issue.id)} retest={() => retest(issue)} retesting={retestingId === issue.id} disabled={loading}/>)}</div>
         <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--border)] bg-[var(--bg-darker)]/35 px-5 py-3 text-[11px] text-[var(--text-secondary)]"><span className="inline-flex items-center gap-2"><b>Issue</b><ArrowRight size={14}/><b>Evidence</b><ArrowRight size={14}/><b>Impact</b><ArrowRight size={14}/><b>Fix</b><ArrowRight size={14}/><b>Re-test</b></span><span>{issues.length} grouped finding{issues.length === 1 ? '' : 's'}</span></footer>
-      </> : <div className="grid place-items-center px-6 py-14 text-center"><span className="grid size-12 place-items-center rounded-full border border-[var(--accent-teal)]/25 bg-[var(--accent-teal)]/10 text-emerald-100"><Check size={24}/></span><h3 className="mt-4 text-base font-semibold text-[var(--text)]">No crawler issues found</h3><p className="mt-2 max-w-md text-[13px] leading-5 text-[var(--text-secondary)]">Current policy and page evidence contains no crawler blockers requiring action.</p></div>}
+      </> : <div className="grid place-items-center px-6 py-14 text-center"><span className="grid size-12 place-items-center rounded-full border border-[var(--accent-teal)]/25 bg-[var(--accent-teal)]/10 text-[var(--status-good)]"><Check size={24}/></span><h3 className="mt-4 text-base font-semibold text-[var(--text)]">No crawler issues found</h3><p className="mt-2 max-w-md text-[13px] leading-5 text-[var(--text-secondary)]">Current policy and page evidence contains no crawler blockers requiring action.</p></div>}
     </section>
   )
 }

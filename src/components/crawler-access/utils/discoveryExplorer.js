@@ -153,7 +153,7 @@ export function filterDiscoveryRecords(records, { group = 'home', query = '', fi
   const normalizedQuery = query.trim().toLowerCase()
   const active = new Set(filters)
   return records.filter(record => {
-    if (group && record.group !== group) return false
+    if (group && group !== 'all' && record.group !== group) return false
     if (normalizedQuery && !`${record.url} ${record.path}`.toLowerCase().includes(normalizedQuery)) return false
     if (active.has('blocked') && record.robotsAccess !== 'blocked' && record.status !== 'blocked') return false
     if (active.has('no-links') && !(record.group !== 'home' && record.linkEvidenceInspected && record.incoming.length === 0)) return false

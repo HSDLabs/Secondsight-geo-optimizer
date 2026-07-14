@@ -11,9 +11,10 @@ import {
 
 export const sidebarIcons = {
   '/': OverviewIcon,
+  '/ai-visibility': PromptIcon,
   '/ai-understanding': UnderstandingIcon,
-  '/crawler-access': CrawlerIcon,
-  '/content-intelligence': IntelligenceIcon,
+  '/crawl-indexability': CrawlerIcon,
+  '/sources-authority': IntelligenceIcon,
   '/content-gaps': ContentGapsIcon,
   '/recommendations': RecommendationsIcon,
   '/prompt-simulator': PromptIcon,

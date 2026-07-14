@@ -4,9 +4,9 @@ import { CRAWLER_BY_ID, CRAWLER_CATALOG } from './utils/crawlerUtils'
 import CrawlerLogo from './CrawlerLogo'
 
 const accessTone = {
-  allowed: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
-  blocked: 'border-rose-400/20 bg-rose-400/10 text-rose-300',
-  unknown: 'border-slate-500/30 bg-slate-500/10 text-slate-400'
+  allowed: 'border-[var(--accent-teal)]/20 bg-[var(--accent-teal)]/10 text-[var(--status-good)]',
+  blocked: 'border-[var(--accent-red)]/20 bg-[var(--accent-red)]/10 text-[var(--status-danger)]',
+  unknown: 'border-[var(--border-strong)] bg-[var(--panel-raised)] text-[var(--text-secondary)]'
 }
 const coverageLabel = { full: 'Full', partial: 'Partial', none: 'None', unknown: 'Unknown' }
 
@@ -64,7 +64,7 @@ export default function CrawlerPermissions({ initialInspection, origin, onInspec
               <h2 id="crawler-access-title" className="m-0 text-base font-bold tracking-[-.02em] text-[var(--text)]">1. Crawler Permissions</h2>
               <p className="mt-1 text-xs text-[var(--muted)]">How each crawler is treated by robots.txt for the inspected URL.</p>
             </div>
-            <span className="shrink-0 rounded-full border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.08em] text-blue-100">10 agents</span>
+            <span className="shrink-0 rounded-full border border-[var(--accent-blue)]/25 bg-[var(--accent-blue)]/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.08em] text-[var(--status-info)]">10 agents</span>
           </div>
         </header>
 
@@ -91,13 +91,13 @@ export default function CrawlerPermissions({ initialInspection, origin, onInspec
 
       <aside className="h-full min-w-0 rounded-xl border border-[var(--border)] bg-[var(--panel)] p-5" aria-labelledby="bot-inspector-title">
         <div className="flex items-center gap-2">
-          <span className="grid size-10 place-items-center rounded-xl border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/[.07] text-blue-100"><FlaskConical size={20} /></span>
+          <span className="grid size-10 place-items-center rounded-xl border border-[var(--accent-blue)]/20 bg-[var(--accent-blue)]/[.07] text-[var(--status-info)]"><FlaskConical size={20} /></span>
           <h2 id="bot-inspector-title" className="m-0 text-[13px] font-bold uppercase tracking-[.08em] text-[var(--text)]">URL + Bot Inspector</h2>
         </div>
 
         <label className="mt-5 block text-[11px] font-semibold text-[var(--text-secondary)]" htmlFor="crawler-test-url">URL</label>
         <input id="crawler-test-url" value={urlInput} onChange={handleUrlChange} className="mt-2 w-full rounded-md border border-[var(--border)] bg-[var(--bg-darker)] px-3 py-2.5 text-xs text-[var(--text)] outline-none transition placeholder:text-[var(--faint)] focus:border-sky-400/50 focus:ring-2 focus:ring-sky-400/10" placeholder="/products/example" />
-        {(resolved.error || requestError) && <p role="alert" className="mt-2 text-[12px] leading-5 text-rose-100">{resolved.error || requestError}</p>}
+        {(resolved.error || requestError) && <p role="alert" className="mt-2 text-[12px] leading-5 text-[var(--status-danger)]">{resolved.error || requestError}</p>}
 
         <label className="mt-4 block text-[11px] font-semibold text-[var(--text-secondary)]" htmlFor="crawler-test-bot">Bot</label>
         <div className="relative mt-2 h-10">
@@ -158,7 +158,7 @@ function InspectorResult({ crawler, result, shared, onShowIssue }) {
         <div className="flex items-center gap-2">{allowed ? <Check size={16} /> : <ShieldAlert size={16} />}<strong className="text-xs uppercase tracking-[.06em]">{verdict}</strong></div>
         <p className="mt-1 text-[12px] leading-5 opacity-85">{crawler.name} is {unknown ? 'not currently verifiable for' : allowed ? 'permitted to request' : 'blocked from'} this URL by robots.txt.</p>
       </div>
-      <div className="mt-3 rounded-lg border border-[var(--border)] bg-black/10 p-3">
+      <div className="mt-3 rounded-lg border border-[var(--border)] bg-[var(--panel-soft)] p-3">
         <h3 className="m-0 text-[11px] font-bold uppercase tracking-[.09em] text-[var(--text-secondary)]">Bot-specific policy</h3>
         <dl className="mt-3 grid grid-cols-[100px_minmax(0,1fr)_44px] gap-x-3 gap-y-2 text-[12px]"><dt className="text-[var(--text-secondary)]">Matching rule</dt><dd className="m-0 truncate font-mono text-[var(--text)]">{formatRule(result.matchedRule)}</dd><dd className="m-0 text-right font-mono text-[var(--text-secondary)]">{result.matchedRule?.line || '—'}</dd><dt className="text-[var(--text-secondary)]">Rule source</dt><dd className="col-span-2 m-0 capitalize text-[var(--text-secondary)]">{result.ruleSource}</dd><dt className="text-[var(--text-secondary)]">Site coverage</dt><dd className="col-span-2 m-0 text-[var(--text-secondary)]">{coverageLabel[result.coverage]}</dd></dl>
         {result.issueIds?.length > 0 && <button type="button" onClick={() => onShowIssue?.(result.issueIds[0])} className="mt-3 inline-flex items-center gap-1.5 text-[10px] font-semibold text-amber-300 hover:text-amber-200"><AlertTriangle size={11} /> View related issue</button>}
@@ -172,12 +172,12 @@ function InspectorResult({ crawler, result, shared, onShowIssue }) {
 }
 
 function Evidence({ label, value, tone, truncate }) {
-  return <><dt className="text-[var(--faint)]">{label}</dt><dd className={`m-0 ${truncate ? 'truncate' : ''} ${tone === 'good' ? 'text-emerald-300' : tone === 'bad' ? 'text-rose-300' : 'text-[var(--muted)]'}`} title={truncate ? value : undefined}>{value}</dd></>
+  return <><dt className="text-[var(--faint)]">{label}</dt><dd className={`m-0 ${truncate ? 'truncate' : ''} ${tone === 'good' ? 'text-[var(--status-good)]' : tone === 'bad' ? 'text-[var(--status-danger)]' : 'text-[var(--muted)]'}`} title={truncate ? value : undefined}>{value}</dd></>
 }
 
 function StatusBadge({ access = 'unknown', coverage }) {
   const label = access === 'unknown' ? 'Unknown' : access === 'blocked' ? 'Blocked' : coverage === 'partial' ? 'Limited' : 'Allowed'
-  const tone = access === 'blocked' ? accessTone.blocked : access === 'unknown' ? accessTone.unknown : coverage === 'partial' ? 'border-amber-400/20 bg-amber-400/10 text-amber-300' : accessTone.allowed
+  const tone = access === 'blocked' ? accessTone.blocked : access === 'unknown' ? accessTone.unknown : coverage === 'partial' ? 'border-[var(--accent-amber)]/20 bg-[var(--accent-amber)]/10 text-[var(--status-warning)]' : accessTone.allowed
   return <span className={`inline-flex min-h-7 w-fit items-center rounded-full border px-2.5 text-[10px] font-bold uppercase tracking-[.05em] ${tone}`}>{label}</span>
 }
 

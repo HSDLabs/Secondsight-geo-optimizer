@@ -11,11 +11,15 @@
     "server": "nodemon server/index.js",
     "lint": "eslint .",
     "test:crawler": "node --test server/services/crawler/*.test.mjs",
+    "test:external": "node --test server/services/externalIntelligence/*.test.mjs",
+    "test:ai-visibility": "node --test server/services/aiVisibilityService.test.mjs",
     "test:ui": "vitest run",
     "test:ui:watch": "vitest",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.111.0",
+    "@google/genai": "^2.3.0",
     "@heroicons/react": "^2.2.0",
     "@mozilla/readability": "^0.6.0",
     "@tailwindcss/vite": "^4.3.1",
@@ -25,6 +29,7 @@
     "fast-xml-parser": "^5.9.3",
     "impeccable": "^3.2.1",
     "jsdom": "^29.1.1",
+    "openai": "^6.46.0",
     "playwright": "1.61.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",

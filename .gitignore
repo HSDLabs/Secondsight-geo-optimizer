@@ -27,6 +27,4 @@ dist-ssr
 ARCHITECTURE.md
 *.env
 docs/*
-!docs/visual-design-system.md
 .agent
-/docs
